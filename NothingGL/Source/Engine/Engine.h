@@ -10,8 +10,8 @@ private:
 	int width;
 	int height;
 
-	std::vector<std::shared_ptr<Renderer::Model>> models;
 	std::vector<std::shared_ptr<Renderer::Material>> materials;
+	std::vector<std::shared_ptr<Renderer::Model>> models;
 	std::unique_ptr<Renderer::RenderEngine> renderer;
 
 public:

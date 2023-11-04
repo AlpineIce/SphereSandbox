@@ -69,22 +69,21 @@ namespace Renderer
 	class Material
 	{
 	private:
-		Shader shader;
+		Shader* shader;
 		std::map<TextureType, std::shared_ptr<Texture>> textures;
 		std::map<UniformVariable, std::string> uniforms;
 
 		void getUniforms(MaterialType type);
 		void loadTextures(std::string path);
-		void assignTextures();
 		
 	public:
-		Material(MaterialType type, std::string path);
+		Material(MaterialType type, std::string path, Shader* shaderBase);
 		~Material();
 
 		void useMaterial();
 		void unbind();
 
-		inline Shader* getShader() { return &shader; }
+		inline Shader* getShader() { return shader; }
 	};
 
 }

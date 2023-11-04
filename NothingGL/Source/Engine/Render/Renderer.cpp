@@ -146,15 +146,27 @@ namespace Renderer
 		glDebugMessageCallback(MessageCallback, 0);
 
 		//load shader
-		Material cupBaseMaterial(MaterialType::PBR, "Materials/SkulCup/m_Base");
-		Material cupBoneMaterial(MaterialType::PBR, "Materials/SkulCup/m_Bone");
-		Material cupGemMaterial(MaterialType::PBR, "Materials/SkulCup/m_Gem");
-		Material cupTeethMaterial(MaterialType::PBR, "Materials/SkulCup/m_Teeth");
+		Shader shader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
+		Material cupBaseMaterial(MaterialType::PBR, "Materials/SkulCup/m_Base", &shader);
+		Material cupBoneMaterial(MaterialType::PBR, "Materials/SkulCup/m_Bone", &shader);
+		Material cupGemMaterial(MaterialType::PBR, "Materials/SkulCup/m_Gem", &shader);
+		Material cupTeethMaterial(MaterialType::PBR, "Materials/SkulCup/m_Teeth", &shader);
 
 		//load models
 		Model model("Models/SculCup/SkullCup.fbx");
 		Model ground("Models/Ground/ground.fbx");
 		Model cube("Models/Cube/Cube.fbx");
+
+		auto mat = model.getMaterialSlots();
+		mat[0] = &cupTeethMaterial;
+		mat[1] = &cupBaseMaterial;
+		mat[2] = &cupBoneMaterial;
+		mat[3] = &cupGemMaterial;
+		model.setMaterialSlots(mat);
+		cube.setMaterialSlots(mat);
+		ground.setMaterialSlots(mat);
+		
+
 		ModelInstance testModel(&model);
 		ModelInstance testModel2(&model);
 		ModelInstance ground1(&ground);
@@ -173,11 +185,15 @@ namespace Renderer
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
+		
 		while (!glfwWindowShouldClose(window))
 		{
 			Transformation lightTransform;
 			lightTransform.location = { sin(time) * 5.0f, 0.0f, cos(time) * 5.0f };
+			
+			cupBaseMaterial.getShader()->bind();
 			cupBaseMaterial.getShader()->setFloat3("lightPos", lightTransform.location);
+			cupBaseMaterial.getShader()->unbind();
 
 			Transformation modelTransform;
 			modelTransform.location = glm::vec3(sin(time) * 2.0f, cos(time) * 2.0f, 0.0f);
@@ -211,12 +227,6 @@ namespace Renderer
 		deltaTime = glfwGetTime() - time;
 		time = glfwGetTime();
 		camera.update(deltaTime);
-
-		auto err = glGetError();
-		if (err)
-		{
-			std::cout << err << std::endl;
-		}
 
 		
 

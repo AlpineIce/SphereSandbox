@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "GLM/gtc/matrix_inverse.hpp"
@@ -45,7 +46,7 @@ namespace Renderer
 		std::vector<unsigned int> indices;
 		glm::mat4 modelMatrix;
 		Transformation transformation;
-		Material* material;
+		unsigned int materialIndex;
 
 		VertexBuffer VB;
 		IndexBuffer IB;
@@ -54,15 +55,16 @@ namespace Renderer
 		void initMesh();
 
 	public:
-		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material* material);
+		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int materialIndex);
 		~Mesh();
 
-		void draw(Camera& camera, glm::mat4& instMatrix);
+		void draw(Camera& camera, glm::mat4& instMatrix, Material* material);
 
 		void setTransformation(Transformation transform);
-		void setMaterial(Material* material);
+		void setMaterialIndex(unsigned int materialIndex);
 
 		glm::mat4 getModelMatrix();
+		inline unsigned int getMaterialIndex() { return materialIndex; }
 	};
 
 	//wrapper for multiple Mesh classes (think of a model with multiple parts)
@@ -73,10 +75,12 @@ namespace Renderer
 		Transformation transformation;
 		std::string directory;
 		std::string name;
+		std::map<unsigned int, Material*> materialSlots;
 
 		struct ReturnMesh {
 			std::vector<Vertex> vertices;
 			std::vector<unsigned int> indices;
+			unsigned int materialIndex = 0;
 		};
 
 		void loadModel(std::string path);
@@ -92,6 +96,8 @@ namespace Renderer
 
 		inline std::string getName() { return name; }
 		inline std::string getDirectory() { return directory; }
+		inline std::map<unsigned int, Material*> getMaterialSlots() { return materialSlots; }
+		inline void setMaterialSlots(std::map<unsigned int, Material*> materialMap) { this->materialSlots = materialMap; }
 	};
 
 	//class to draw instanced models

@@ -172,7 +172,7 @@ namespace Renderer
 			uniforms.push_back(std::string(name));
 		}
 
-		unbind();
+		//unbind();
 
 		return uniforms;
 	}
@@ -211,12 +211,12 @@ namespace Renderer
 
 	
 
-	Material::Material(MaterialType type, std::string path)
-		:shader("Shaders/vertex.glsl", "Shaders/fragment.glsl")
+	Material::Material(MaterialType type, std::string path, Shader* shader)
+		: shader(shader)
 	{
+		
 		getUniforms(type);
 		loadTextures(path);
-		assignTextures();
 	}
 
 	Material::~Material()
@@ -227,15 +227,16 @@ namespace Renderer
 	{
 		if (type == MaterialType::PBR)
 		{
-			std::vector<std::string> uniforms = shader.getUniforms();
+			std::vector<std::string> uniforms = shader->getUniforms();
 			for (int i = 0; i < uniforms.size(); i++)
 			{
 				//textures
+				auto a = uniforms.at(i);
 				if (uniforms.at(i) == "Albedo")
 				{
 					this->uniforms[UniformVariable::ALBEDO] = uniforms.at(i);
 				}
-				else if (uniforms.at(i) == "Specular")
+				else if (uniforms.at(i) == "Metallic")
 				{
 					this->uniforms[UniformVariable::SPECULAR] = uniforms.at(i);
 				}
@@ -279,24 +280,24 @@ namespace Renderer
 				}
 				if (entryPath.find(".")) //make sure its an actual file and not a directory only
 				{
-					if (entry.path().string().find("Albedo") != std::string::npos)
+					if (entry.path().string().find("Albedo") != std::string::npos && uniforms.count(UniformVariable::ALBEDO))
 					{
 						this->textures[TextureType::ALBEDO] = std::make_shared<Texture>(entryPath, TextureType::ALBEDO);
 						continue;
 					}
-					if (entry.path().string().find("Specular") != std::string::npos || entry.path().string().find("Metallic") != std::string::npos)
+					if ((entry.path().string().find("Specular") != std::string::npos || entry.path().string().find("Metallic") != std::string::npos) && uniforms.count(UniformVariable::SPECULAR))
 					{
 						this->textures[TextureType::SPECULAR] = std::make_shared<Texture>(entryPath, TextureType::SPECULAR);
 						continue;
 					}
-					if (entry.path().string().find("Roughness") != std::string::npos)
+					if (entry.path().string().find("Roughness") != std::string::npos && uniforms.count(UniformVariable::ROUGHNESS))
 					{
 						this->textures[TextureType::ROUGHNESS] = std::make_shared<Texture>(entryPath, TextureType::ROUGHNESS);
 						continue;
 					}
-					if (entry.path().string().find("Normal") != std::string::npos)
+					if (entry.path().string().find("Normal") != std::string::npos && uniforms.count(UniformVariable::NORMAL))
 					{
-						this->textures[TextureType::NORMAL] = std::make_shared<Texture>(entryPath, TextureType::NORMAL);
+						this->textures[TextureType::NORMAL] = std::make_shared<Texture>(entryPath, TextureType::NORMAL);						
 						continue;
 					}
 				}
@@ -308,47 +309,25 @@ namespace Renderer
 		}
 	}
 
-	void Material::assignTextures()
-	{
-		unsigned int texIndex = 0;
-		if (textures.count(TextureType::ALBEDO) != 0 && uniforms.count(UniformVariable::ALBEDO))
-		{
-			textures.at(TextureType::ALBEDO)->useTexture(texIndex);
-			shader.setInt(uniforms.at(UniformVariable::ALBEDO), texIndex);
-			texIndex++;
-		}
-		if (textures.count(TextureType::SPECULAR) != 0 && uniforms.count(UniformVariable::SPECULAR))
-		{
-			textures.at(TextureType::SPECULAR)->useTexture(texIndex);
-			shader.setInt(uniforms.at(UniformVariable::SPECULAR), texIndex);
-			texIndex++;
-		}
-		if (textures.count(TextureType::ROUGHNESS) != 0 && uniforms.count(UniformVariable::ROUGHNESS))
-		{
-			textures.at(TextureType::ROUGHNESS)->useTexture(texIndex);
-			shader.setInt(uniforms.at(UniformVariable::ROUGHNESS), texIndex);
-			texIndex++;
-		}
-		if (textures.count(TextureType::NORMAL) != 0 && uniforms.count(UniformVariable::NORMAL))
-		{
-			textures.at(TextureType::NORMAL)->useTexture(texIndex);
-			shader.setInt(uniforms.at(UniformVariable::NORMAL), texIndex);
-			texIndex++;
-		}
-	}
-
 	void Material::useMaterial()
 	{
-		shader.bind();
-		assignTextures();
+		shader->bind();
+		unsigned int texIndex = 0;
+		for (auto [key, val] : textures)
+		{
+			val->useTexture(texIndex);
+			shader->setInt(uniforms.at(UniformVariable(key)), texIndex);
+			
+			texIndex++;
+		}
 	}
 
 	void Material::unbind()
 	{
-		/*for (auto texture : textures)
+		for (auto [key, val] : textures)
 		{
-			texture->unbind();
-		}*/
+			val->unbind();
+		}
+		shader->unbind();
 	}
-
 }
