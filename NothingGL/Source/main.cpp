@@ -5,38 +5,50 @@
 int main()
 {
 	Engine engine;
-	engine.loadModels("Models");
 	engine.loadShaders("Shaders");
+	engine.loadModels("Models");
 	engine.loadMaterials("Materials");
 
-	//skull cup material initialization
-	auto mat = engine.getModels()->at("SkullCup")->getMaterialSlots();
-	mat[0] = engine.getMaterialFromName("SkulCup_m_Teeth");
-	mat[1] = engine.getMaterialFromName("SkulCup_m_Base");
-	mat[2] = engine.getMaterialFromName("SkulCup_m_Bone");
-	mat[3] = engine.getMaterialFromName("SkulCup_m_Gem");
-	engine.getModels()->at("SkullCup")->setMaterialSlots(mat);
-	engine.getModels()->at("Cube")->setMaterialSlots(mat);
-	engine.getModels()->at("ground")->setMaterialSlots(mat);
+	//skull cup materials
+	auto cup_m = engine.getModelMaterialSlots("SkullCup");
+	if (cup_m.size())
+	{
+		cup_m[0] = engine.getMaterialFromName("SkulCup_m_Teeth");
+		cup_m[1] = engine.getMaterialFromName("SkulCup_m_Base");
+		cup_m[2] = engine.getMaterialFromName("SkulCup_m_Bone");
+		cup_m[3] = engine.getMaterialFromName("SkulCup_m_Gem");
+		engine.setModelMaterialSlots("SkullCup", cup_m);
+		engine.setModelMaterialSlots("ground", cup_m);
+		engine.setModelMaterialSlots("Cube", cup_m);
+	}
+	
 
-	Renderer::ModelInstance testModel(engine.getModels()->at("SkullCup").get());
-	Renderer::ModelInstance testModel2(engine.getModels()->at("SkullCup").get());
-	Renderer::ModelInstance ground1(engine.getModels()->at("ground").get());
-	Renderer::ModelInstance bruhcube(engine.getModels()->at("Cube").get());
+	//backpack material
+	auto backpack_m = engine.getModelMaterialSlots("Backpack");
+	if (backpack_m.size())
+	{
+		backpack_m[0] = engine.getMaterialFromName("Backpack_m_Base");
+		engine.setModelMaterialSlots("Backpack", backpack_m);
+	}
+	
+	Renderer::ModelInstance backpack(engine.getModelFromName("Backpack"));
+	Renderer::ModelInstance testModel(engine.getModelFromName("SkullCup"));
+	Renderer::ModelInstance testModel2(engine.getModelFromName("SkullCup"));
+	Renderer::ModelInstance ground1(engine.getModelFromName("ground"));
+	Renderer::ModelInstance bruhcube(engine.getModelFromName("Cube"));
 
 	Renderer::Transformation cubeTransform;
 	cubeTransform.location = { 5.0f, 0.0f, 0.0f };
 	bruhcube.setTransformation(cubeTransform);
 
+	Renderer::Transformation backpackTransform;
+	backpackTransform.location = { -5.0f, 0.0f, 0.0f };
+	backpack.setTransformation(backpackTransform);
 
 	Renderer::Transformation groundTransform;
 	groundTransform.rotation = glm::quat(0.707106f, -0.707106f, 0.0f, 0.0f);
 	groundTransform.location = (glm::vec3(0.0f, -4.0f, 0.0f));
 	ground1.setTransformation(groundTransform);
-
-
-
-
 
 	bool exitLoop = false;
 	while (!exitLoop)
@@ -46,17 +58,17 @@ int main()
 
 		Renderer::Transformation lightTransform;
 		lightTransform.location = { sin(*engine.time) * 5.0f, 0.0f, cos(*engine.time) * 5.0f };
-
-		engine.getShaders()->at(MaterialType::PBR)->bind();
-		engine.getShaders()->at(MaterialType::PBR)->setFloat3("lightPos", lightTransform.location);
-		engine.getShaders()->at(MaterialType::PBR)->setFloat3("viewPos", engine.getRenderer()->getCamera()->getPosition());
-		engine.getShaders()->at(MaterialType::PBR)->unbind();
+		
+		engine.getShaderByType(MaterialType::PBR)->bind();
+		engine.getShaderByType(MaterialType::PBR)->setFloat3("lightPos", lightTransform.location);
+		engine.getShaderByType(MaterialType::PBR)->setFloat3("viewPos", engine.getRenderer()->getCamera()->getPosition());
+		engine.getShaderByType(MaterialType::PBR)->unbind();
 
 		Renderer::Transformation modelTransform;
 		modelTransform.location = glm::vec3(sin(*engine.time) * 2.0f, cos(*engine.time) * 2.0f, 0.0f);
 		modelTransform.rotation = glm::quat(sin(*engine.time), 0.0f, cos(*engine.time), 0.0f);
 
-
+		backpack.render(engine.getRenderer()->getCamera());
 		ground1.render(engine.getRenderer()->getCamera());
 		testModel.setTransformation(modelTransform);
 		testModel.render(engine.getRenderer()->getCamera());

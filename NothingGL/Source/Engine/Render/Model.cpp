@@ -44,6 +44,9 @@ namespace Renderer
 
 			int modelLoc = glGetUniformLocation(material->getShader()->getShaderID(), "model");
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix * instMatrix));
+
+			material->getShader()->setFloat3("cameraPos", camera.getPosition());
+
 		}
 		else
 		{
@@ -55,7 +58,6 @@ namespace Renderer
 		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 		VA.unbind();
 
-		glFinish();
 		material->unbind();
 	}
 
