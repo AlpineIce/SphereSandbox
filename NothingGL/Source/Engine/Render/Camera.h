@@ -33,12 +33,12 @@ namespace Renderer
 		bool bLeft;
 		bool bRight;
 
-		const glm::vec3& getPosition() { return position; }
-		const glm::vec3& getTarget() { return target; }
-		const glm::vec3& getDirection() { return direction; }
+		glm::vec3 getPosition() const { return position; }
+		glm::vec3 getTarget() const { return target; }
+		glm::vec3 getDirection() const { return direction; }
 
-		const glm::mat4& getProjection() { return projection; }
-		const glm::mat4& getView() { return view; }
+		glm::mat4 getProjection() const { return projection; }
+		glm::mat4 getView() const { return view; }
 	};
 
 }

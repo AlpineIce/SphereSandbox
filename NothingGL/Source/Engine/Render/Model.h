@@ -58,7 +58,7 @@ namespace Renderer
 		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int materialIndex);
 		~Mesh();
 
-		void draw(Camera& camera, glm::mat4& instMatrix, Material* material);
+		void draw(const Camera& camera, glm::mat4& instMatrix, Material* material);
 
 		void setTransformation(Transformation transform);
 		void setMaterialIndex(unsigned int materialIndex);
@@ -91,7 +91,7 @@ namespace Renderer
 		Model(std::string path);
 		~Model();
 
-		void draw(Camera& camera, glm::mat4& instMatrix);
+		void draw(const Camera& camera, glm::mat4& instMatrix);
 		void setTransformation(Transformation transform);
 
 		inline std::string getName() { return name; }
@@ -114,7 +114,7 @@ namespace Renderer
 		~ModelInstance();
 
 		void setTransformation(Transformation transform);
-		void render(Camera& camera);
+		void render(const Camera* camera);
 	};
 
 }

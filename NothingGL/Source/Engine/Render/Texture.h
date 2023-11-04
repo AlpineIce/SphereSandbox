@@ -14,14 +14,6 @@ namespace Renderer
 		R = GL_R8
 	};
 
-	enum TextureType
-	{
-		ALBEDO = 0,
-		SPECULAR = 1,
-		ROUGHNESS = 2,
-		NORMAL = 3
-	};
-
 	class Texture
 	{
 	private:
@@ -30,21 +22,21 @@ namespace Renderer
 		int resX, resY;
 		int nrChannels;
 		imageDataType imageFormat;
-		TextureType type;
+		int type;
 		std::string path;
 
-		void createTexture(std::string filename, TextureType type);
+		void createTexture(std::string filename, int type);
 		void loadTexture(const char* filename);
 
 	public:
-		Texture(std::string filename, TextureType type);
+		Texture(std::string filename, int type);
 		~Texture();
 		
 		void useTexture(unsigned int texIndex);
 		void unbind();
 
 		inline const unsigned int& getID() { return texObj; }
-		inline TextureType getType() { return type; }
+		inline int getType() { return type; }
 		inline const std::string getPath() { return path; };
 	};
 

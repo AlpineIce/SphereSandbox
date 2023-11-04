@@ -10,7 +10,6 @@
 #include "GLM/glm.hpp"
 #include "GLM/gtc/matrix_transform.hpp"
 
-
 enum MaterialType
 {
 	PBR = 0
@@ -70,7 +69,7 @@ namespace Renderer
 	{
 	private:
 		Shader* shader;
-		std::map<TextureType, std::shared_ptr<Texture>> textures;
+		std::map<UniformVariable, std::shared_ptr<Texture>> textures;
 		std::map<UniformVariable, std::string> uniforms;
 
 		void getUniforms(MaterialType type);

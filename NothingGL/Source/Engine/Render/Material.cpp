@@ -11,7 +11,10 @@ namespace Renderer
 
 	Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	{
-		loadShader(vertexPath, fragmentPath);
+		if (loadShader(vertexPath, fragmentPath) == -1)
+		{
+			throw std::runtime_error("Error: shader couldn't be loaded");
+		}
 	}
 
 	Shader::~Shader()
@@ -22,12 +25,12 @@ namespace Renderer
 	int Shader::loadShader(const char* vertexPath, const char* fragmentPath)
 	{
 		//opening and copying files to strings
-		std::ifstream vertex("Shaders/vertex.glsl");
+		std::ifstream vertex(vertexPath);
 		if (!vertex.is_open()) {
 			return -1;
 		}
 
-		std::ifstream fragment("Shaders/fragment.glsl");
+		std::ifstream fragment(fragmentPath);
 		if (!fragment.is_open()) {
 			return -1;
 		}
@@ -282,22 +285,22 @@ namespace Renderer
 				{
 					if (entry.path().string().find("Albedo") != std::string::npos && uniforms.count(UniformVariable::ALBEDO))
 					{
-						this->textures[TextureType::ALBEDO] = std::make_shared<Texture>(entryPath, TextureType::ALBEDO);
+						this->textures[UniformVariable::ALBEDO] = std::make_shared<Texture>(entryPath, UniformVariable::ALBEDO);
 						continue;
 					}
 					if ((entry.path().string().find("Specular") != std::string::npos || entry.path().string().find("Metallic") != std::string::npos) && uniforms.count(UniformVariable::SPECULAR))
 					{
-						this->textures[TextureType::SPECULAR] = std::make_shared<Texture>(entryPath, TextureType::SPECULAR);
+						this->textures[UniformVariable::SPECULAR] = std::make_shared<Texture>(entryPath, UniformVariable::SPECULAR);
 						continue;
 					}
 					if (entry.path().string().find("Roughness") != std::string::npos && uniforms.count(UniformVariable::ROUGHNESS))
 					{
-						this->textures[TextureType::ROUGHNESS] = std::make_shared<Texture>(entryPath, TextureType::ROUGHNESS);
+						this->textures[UniformVariable::ROUGHNESS] = std::make_shared<Texture>(entryPath, UniformVariable::ROUGHNESS);
 						continue;
 					}
 					if (entry.path().string().find("Normal") != std::string::npos && uniforms.count(UniformVariable::NORMAL))
 					{
-						this->textures[TextureType::NORMAL] = std::make_shared<Texture>(entryPath, TextureType::NORMAL);						
+						this->textures[UniformVariable::NORMAL] = std::make_shared<Texture>(entryPath, UniformVariable::NORMAL);
 						continue;
 					}
 				}
@@ -305,7 +308,7 @@ namespace Renderer
 		}
 		catch (std::filesystem::filesystem_error error)
 		{
-			std::cout << "Problem loading material texture files: " << error.what() << "\n";
+			throw error.what();
 		}
 	}
 

@@ -1,7 +1,9 @@
 #pragma once
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "GLM/glm.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 
 namespace Renderer
@@ -39,8 +41,10 @@ namespace Renderer
 		void postDrawEvent();
 		bool checkWindowClose() { return glfwWindowShouldClose(window); }
 
-		const double& getDeltaTime();
-		void printTime();
+		inline double& getDeltaTime() const { return deltaTime; }
+		inline Camera* getCamera() const { return &camera; }
+		inline double* getTimePointer() const { return &time; };
+
 
 	};
 

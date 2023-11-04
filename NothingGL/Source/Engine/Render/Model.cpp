@@ -26,7 +26,7 @@ namespace Renderer
 		VA.addBuffer(VB);
 	}
 
-	void Mesh::draw(Camera& camera, glm::mat4& instMatrix, Material* material)
+	void Mesh::draw(const Camera& camera, glm::mat4& instMatrix, Material* material)
 	{
 		glm::mat4 modelMatrix = getModelMatrix();
 
@@ -186,7 +186,7 @@ namespace Renderer
 		return returnMesh;
 	}
 
-	void Model::draw(Camera& camera, glm::mat4& instMatrix)
+	void Model::draw(const Camera& camera, glm::mat4& instMatrix)
 	{
 		unsigned int meshIndex = 0;
 		for (std::shared_ptr<Mesh> mesh : meshes)
@@ -231,9 +231,9 @@ namespace Renderer
 		this->modelMatrix = getMatrix();
 	}
 
-	void ModelInstance::render(Camera& camera)
+	void ModelInstance::render(const Camera* camera)
 	{
-		parentModel->draw(camera, modelMatrix);
+		parentModel->draw(*camera, modelMatrix);
 	}
 
 }

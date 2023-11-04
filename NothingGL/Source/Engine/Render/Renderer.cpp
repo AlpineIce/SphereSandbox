@@ -1,14 +1,8 @@
 #include "Renderer.h"
-#include <iostream>
-#include <fstream>
 #include "Material.h"
-#include "Texture.h"
-#include "Model.h"
+#include <iostream>
 #include "Camera.h"
-#include <thread>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
 
 namespace Renderer
 {
@@ -102,11 +96,6 @@ namespace Renderer
 			type, severity, message);
 	}
 
-	void RenderEngine::printTime()
-	{
-		std::cout << getDeltaTime() << std::endl;
-	}
-
 	int RenderEngine::initWindow(int width, int height)
 	{
 		if (glfwInit() != GLFW_TRUE)
@@ -145,80 +134,16 @@ namespace Renderer
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
 
-		//load shader
-		Shader shader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
-		Material cupBaseMaterial(MaterialType::PBR, "Materials/SkulCup/m_Base", &shader);
-		Material cupBoneMaterial(MaterialType::PBR, "Materials/SkulCup/m_Bone", &shader);
-		Material cupGemMaterial(MaterialType::PBR, "Materials/SkulCup/m_Gem", &shader);
-		Material cupTeethMaterial(MaterialType::PBR, "Materials/SkulCup/m_Teeth", &shader);
-
-		//load models
-		Model model("Models/SculCup/SkullCup.fbx");
-		Model ground("Models/Ground/ground.fbx");
-		Model cube("Models/Cube/Cube.fbx");
-
-		auto mat = model.getMaterialSlots();
-		mat[0] = &cupTeethMaterial;
-		mat[1] = &cupBaseMaterial;
-		mat[2] = &cupBoneMaterial;
-		mat[3] = &cupGemMaterial;
-		model.setMaterialSlots(mat);
-		cube.setMaterialSlots(mat);
-		ground.setMaterialSlots(mat);
-		
-
-		ModelInstance testModel(&model);
-		ModelInstance testModel2(&model);
-		ModelInstance ground1(&ground);
-		ModelInstance bruhcube(&cube);
-
-		Transformation cubeTransform;
-		cubeTransform.location = { 5.0f, 0.0f, 0.0f };
-		bruhcube.setTransformation(cubeTransform);
-		
-
-		Transformation groundTransform;
-		groundTransform.rotation = glm::quat(0.707106f, -0.707106f, 0.0f, 0.0f);
-		groundTransform.location = (glm::vec3(0.0f, -4.0f, 0.0f));
-		ground1.setTransformation(groundTransform);
-
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		
-		while (!glfwWindowShouldClose(window))
-		{
-			Transformation lightTransform;
-			lightTransform.location = { sin(time) * 5.0f, 0.0f, cos(time) * 5.0f };
-			
-			cupBaseMaterial.getShader()->bind();
-			cupBaseMaterial.getShader()->setFloat3("lightPos", lightTransform.location);
-			cupBaseMaterial.getShader()->unbind();
-
-			Transformation modelTransform;
-			modelTransform.location = glm::vec3(sin(time) * 2.0f, cos(time) * 2.0f, 0.0f);
-			modelTransform.rotation = glm::quat(sin(time), 0.0f, cos(time), 0.0f);
-
-
-			preDrawEvent();
-			ground1.render(camera);
-			testModel.setTransformation(modelTransform);
-			testModel.render(camera);
-			testModel2.render(camera);
-			bruhcube.render(camera);
-
-			//model.draw(shader, camera);
-			//ground.draw(shader, camera);
-
-			postDrawEvent();
-		}
-
 		return 0;
 	}
 
 	void RenderEngine::preDrawEvent()
 	{
-		glClearColor(0.0f, 0.6f, 0.6f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -228,15 +153,8 @@ namespace Renderer
 		time = glfwGetTime();
 		camera.update(deltaTime);
 
-		
-
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-	}
-
-	const double& RenderEngine::getDeltaTime()
-	{
-		return deltaTime;
 	}
 
 }

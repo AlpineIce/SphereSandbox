@@ -6,7 +6,7 @@
 namespace Renderer
 {
 
-	Texture::Texture(std::string filename, TextureType type)
+	Texture::Texture(std::string filename, int type)
 		:type(type), path(filename)
 	{
 		createTexture(filename, type);
@@ -17,7 +17,7 @@ namespace Renderer
 		glDeleteTextures(1, &texObj);
 	}
 
-	void Texture::createTexture(std::string filename, TextureType type)
+	void Texture::createTexture(std::string filename, int type)
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &texObj);
 		glBindTexture(GL_TEXTURE_2D, texObj);
@@ -28,13 +28,12 @@ namespace Renderer
 
 		imageData = nullptr;
 		loadTexture(filename.data());
-		GLenum b;
 		if (imageData)
 		{
 			switch (nrChannels)
 			{
 			case 1:
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_R, resX, resY, 0, GL_R, GL_UNSIGNED_BYTE, imageData);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, resX, resY, 0, GL_RED, GL_UNSIGNED_BYTE, imageData);
 				glGenerateMipmap(GL_TEXTURE_2D);
 				imageFormat = R;
 
@@ -49,7 +48,6 @@ namespace Renderer
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resX, resY, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
 				glGenerateMipmap(GL_TEXTURE_2D);
 				imageFormat = RGB;
-				b = glGetError();
 
 				break;
 			case 4:
