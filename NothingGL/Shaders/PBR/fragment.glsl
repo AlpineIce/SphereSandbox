@@ -7,6 +7,7 @@ in vec3 fragPos;
 out vec4 fragColor;
 
 #define PI 3.1415926
+#define MAX_POINT_LIGHTS 32
 
 uniform sampler2D Albedo;
 uniform sampler2D Metallic; //todo make specular and metallic work seperately, also give shininess to material
@@ -16,23 +17,23 @@ uniform sampler2D AO;
 
 struct directionalLight
 {
-    vec3 rotation;
+    vec3 rot;
     float power;
     vec3 color;
 };
 
 struct pointLight
 {
-    vec3 position;
+    vec3 pos;
     vec3 color;
     float power;
     float constant;
     float linear;
-    float quadratic;  
+    float quad;  
 };
 
 uniform directionalLight sun;
-uniform pointLight pLight;
+uniform pointLight[4] pLights;
 uniform vec3 cameraPos;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -40,7 +41,7 @@ uniform vec3 viewPos;
 vec3 CalcDirLight(directionalLight light, vec3 normal, vec3 viewDir)
 {
     //light direction and reflection
-    vec3 lightDir = normalize(-light.rotation);
+    vec3 lightDir = normalize(light.rot);
     vec3 reflectDir = reflect(-lightDir, normal);
     //specular
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
@@ -55,22 +56,20 @@ vec3 CalcDirLight(directionalLight light, vec3 normal, vec3 viewDir)
 vec3 CalcPointLight(pointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     //light direction and reflection
-    vec3 lightDir = normalize(light.position - fragPos);
+    vec3 lightDir = normalize(light.pos - fragPos);
     vec3 reflectDir = reflect(-lightDir, normal);
+    
+    //attenuation
+    float distance = length(light.pos - fragPos);
+    float attenuation = distance * distance;                //TODO FIX THESE SO CONST, LINEAR, AND QUAD WORK WITHOUT MAKING THE SCREEN BLACK
+
     //specular shading
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = texture(Metallic, texCoord).x * spec * light.color;
-    //attenuation
-    float distance = length(light.position - fragPos);
-    float attenuation = 1.0 /   (light.constant
-                                + light.linear * distance
-                                + light.quadratic * (distance * distance));    
+    vec3 specular = texture(Metallic, texCoord).x * spec * light.color / attenuation;
+
     //combine
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 lightStrength  = light.color  * diff * light.power;
-    //attenuate
-    lightStrength  *= attenuation;
-    specular *= attenuation;
+    vec3 lightStrength  = light.color / attenuation  * diff * light.power;
 
     return (lightStrength + specular);
 }
@@ -108,9 +107,9 @@ void main()
 
     int lightCount = 1;
     vec3 pointLightTotal = vec3(0.0);
-    for(int i = 0; i < lightCount; i++)
+    for(int i = 0; i < MAX_POINT_LIGHTS; i++)
     {
-        pointLightTotal += CalcPointLight(pLight, norm, fragPos, viewDir);
+        pointLightTotal += CalcPointLight(pLights[i], norm, fragPos, viewDir);
     }
     
     fragColor = vec4(pointLightTotal + sunLight, 1.0) * texture(Albedo, texCoord);
