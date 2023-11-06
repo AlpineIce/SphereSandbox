@@ -9,7 +9,8 @@ namespace Renderer
 
 	//----------SHADER DEFINITIONS----------//
 
-	Shader::Shader(const char* vertexPath, const char* fragmentPath)
+	Shader::Shader(const char* vertexPath, const char* fragmentPath, Camera* camera)
+		:cameraPtr(camera)
 	{
 		if (loadShader(vertexPath, fragmentPath) == -1)
 		{
@@ -20,6 +21,17 @@ namespace Renderer
 	Shader::~Shader()
 	{
 		glDeleteProgram(shader);
+	}
+
+	int Shader::checkUniform(std::string name)
+	{
+		int location = glGetUniformLocation(shader, name.data());
+		if (location == -1)
+		{
+			std::cout << "Warning: uniform \"" << name << "\" doesn't exist in shader" << "\n";
+			return -1;
+		}
+		return location;
 	}
 
 	int Shader::loadShader(const char* vertexPath, const char* fragmentPath)
@@ -107,6 +119,42 @@ namespace Renderer
 		glUseProgram(0);
 	}
 
+	void Shader::setCameraPosition(glm::vec3 position)
+	{
+		setFloat3("viewPos", position);
+	}
+
+	void Shader::updateLights(const std::vector<std::shared_ptr<PointLight>>& lights, const std::shared_ptr<DirectionalLight>& directLight)
+	{
+		const unsigned int MAX_POINT_LIGHTS = 4; //relates to the defined maximum point lights in the PBR shader
+		unsigned int i = 0;
+		
+		for (std::shared_ptr<PointLight> light : lights)
+		{
+			if (light.get() != NULL && i < MAX_POINT_LIGHTS) //point light must be valid
+			{
+				setFloat3(std::string("pLights[") + std::to_string(i) + std::string("].pos"), light->getShaderStruct().position);
+				setFloat3(std::string("pLights[") + std::to_string(i) + std::string("].color"), light->getShaderStruct().color);
+				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].power"), light->getShaderStruct().power);
+				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].constant"), 1.0f);	//TODO FIGURE OUT WHY THE LAST 3 VARIABLES WONT WORK AT ALL
+				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].linear"), 0.05f);		
+				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].quad"), 0.0f);
+				i++;
+			}
+			else
+			{
+				std::cout << "Warning: couldnt calculate all point lights in scene. Rewrite your terrible code to work properly please" << std::endl;
+			}
+		}
+
+		if (directLight.get() != NULL) //directional light must be valid
+		{
+			setFloat3("sun.rot", directLight->getShaderStruct().position); //note that position for directional light is actually rotation
+			setFloat3("sun.color", directLight->getShaderStruct().color);
+			setFloat("sun.power", directLight->getShaderStruct().power / 20.0f);
+		}
+	}
+
 	void Shader::setFloat(const std::string& name, const float& value)
 	{
 		int location = glGetUniformLocation(shader, name.data());
@@ -121,44 +169,42 @@ namespace Renderer
 
 	void Shader::setFloat3(const std::string& name, const glm::vec3& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniform3f(location, value.x, value.y, value.z);
 	}
 
 	void Shader::setFloat4(const std::string& name, const glm::vec4& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
 	void Shader::setMat3(const std::string& name, const glm::mat3& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
 	}
 
 	void Shader::setMat4(const std::string& name, const glm::mat4& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
 	}
 
 	void Shader::setInt(const std::string& name, const int& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniform1i(location, value);
 	}
 
 	void Shader::setBool(const std::string& name, const bool& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniform1i(location, value);
 	}
 
-	std::vector<std::string> Shader::getUniforms()
+	std::vector<std::string> Shader::getUniforms() //stack overflow code from someone just like the function below
 	{
-		bind();
-
 		GLint i;
 		GLint count;
 		GLint size; // size of the variable
@@ -169,18 +215,16 @@ namespace Renderer
 
 		for (i = 0; i < count; i++)
 		{
-			const GLsizei bufSize = 16;
+			const GLsizei bufSize = 20;
 			GLchar name[bufSize];
 			glGetActiveUniform(shader, (GLuint)i, bufSize, nullptr, &size, &type, name);
 			uniforms.push_back(std::string(name));
 		}
 
-		//unbind();
-
 		return uniforms;
 	}
 
-	std::vector<std::string> Shader::getAttributes() //80% of this definitely didnt come from stack overflow
+	std::vector<std::string> Shader::getAttributes() //80% of this definitely didnt come from stack overflow; also its not being used for anything currently
 	{
 		bind();
 
@@ -218,7 +262,7 @@ namespace Renderer
 		: shader(shader)
 	{
 		
-		getUniforms(type);
+		setTextureUniforms(type);
 		loadTextures(path);
 	}
 
@@ -226,10 +270,11 @@ namespace Renderer
 	{
 	}
 
-	void Material::getUniforms(MaterialType type)
+	void Material::setTextureUniforms(MaterialType type)
 	{
 		if (type == MaterialType::PBR)
 		{
+			shader->bind();
 			std::vector<std::string> uniforms = shader->getUniforms();
 			for (int i = 0; i < uniforms.size(); i++)
 			{
@@ -251,15 +296,8 @@ namespace Renderer
 				{
 					this->uniforms[UniformVariable::NORMAL] = uniforms.at(i);
 				}
-
-				//everything else (scalars, idk)
-
-				//exception (warning)
-				else if (uniforms.at(i) != "normalMat" && uniforms.at(i) != "projection" && uniforms.at(i) != "view" && uniforms.at(i) != "model")
-				{
-					std::cout << "Warning: couldn't find a valid match for uniform variable \"" << uniforms.at(i) << "\"." << "\n";
-				}
 			}
+			shader->unbind();
 		}
 		else
 		{

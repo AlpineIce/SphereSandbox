@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Engine\Actor\ActorComponents">
       <UniqueIdentifier>{6f832a51-d4e5-41f5-a56b-44df88964a5f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Physics">
+      <UniqueIdentifier>{197f0b03-604d-455d-b5a5-0eb6f1fe936a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp">

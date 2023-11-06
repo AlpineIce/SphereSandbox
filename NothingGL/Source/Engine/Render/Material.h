@@ -4,7 +4,11 @@
 #include <map>
 #include <string>
 #include <memory>
+
 #include "Texture.h"
+#include "Camera.h"
+#include "Light.h"
+
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "GLM/glm.hpp"
@@ -33,17 +37,24 @@ namespace Renderer
 		unsigned int fragmentShader;
 		unsigned int shader;
 
+		const Camera* cameraPtr;
+
 		std::string vertexData;
 		std::string fragmentData;
+
+		int checkUniform(std::string name);
 
 		int loadShader(const char* vertexPath, const char* fragmentPath);
 
 	public:
-		Shader(const char* vertexPath, const char* fragmentPath);
+		Shader(const char* vertexPath, const char* fragmentPath, Camera* camera);
 		~Shader();
 
 		void bind();
 		void unbind();
+
+		void setCameraPosition(glm::vec3 position); //shader must be bound before use
+		void updateLights(const std::vector<std::shared_ptr<PointLight>>& lights, const std::shared_ptr<DirectionalLight>& directLight);
 
 		void setFloat(const std::string& name, const float& value);
 		void setFloat2(const std::string& name, const glm::vec2& value);
@@ -72,7 +83,7 @@ namespace Renderer
 		std::map<UniformVariable, std::shared_ptr<Texture>> textures;
 		std::map<UniformVariable, std::string> uniforms;
 
-		void getUniforms(MaterialType type);
+		void setTextureUniforms(MaterialType type);
 		void loadTextures(std::string path);
 		
 	public:

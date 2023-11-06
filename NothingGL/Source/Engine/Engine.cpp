@@ -53,7 +53,7 @@ void Engine::loadShaders(std::string shadersDir)
 				}
 				if (shaderFiles[0].find("vertex.glsl") != std::string::npos && shaderFiles[1].find("fragment.glsl") != std::string::npos)
 				{
-					this->shaders[MaterialType::PBR] = std::make_shared<Renderer::Shader>(shaderFiles[0].c_str(), shaderFiles[1].c_str());
+					this->shaders[MaterialType::PBR] = std::make_shared<Renderer::Shader>(shaderFiles[0].c_str(), shaderFiles[1].c_str(), renderer->getCamera());
 				}
 				else
 				{
