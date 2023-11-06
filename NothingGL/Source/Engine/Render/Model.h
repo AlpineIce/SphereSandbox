@@ -96,8 +96,7 @@ namespace Renderer
 
 		inline std::string getName() { return name; }
 		inline std::string getDirectory() { return directory; }
-		inline std::map<unsigned int, Material*> getMaterialSlots() { return materialSlots; }
-		inline void setMaterialSlots(std::map<unsigned int, Material*> materialMap) { this->materialSlots = materialMap; }
+		inline std::map<unsigned int, Material*>* getMaterialSlots() { return &materialSlots; }
 	};
 
 	//class to draw instanced models

@@ -16,9 +16,6 @@
 # Mono auto generated files
 mono_crash.*
 
-#libraries and bin
-lib/
-Bin/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/

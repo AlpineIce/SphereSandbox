@@ -9,29 +9,24 @@ int main()
 	engine.loadModels("Models");
 	engine.loadMaterials("Materials");
 
-	
-	//some shader variables
-	
-
 	//skull cup materials
-	auto cup_m = engine.getModelMaterialSlots("SkullCup");
-	if (cup_m.size())
+	MaterialSlots cup_m = engine.getModelMaterialSlots("SkullCup");
+	if (cup_m) //TODO TURN THIS INTO A FUNCTION WHICH TAKES IN A LIST OF STRINGS AS MATERIAL NAMES
 	{
-		cup_m[0] = engine.getMaterialFromName("SkulCup_m_Teeth");
-		cup_m[1] = engine.getMaterialFromName("SkulCup_m_Base");
-		cup_m[2] = engine.getMaterialFromName("SkulCup_m_Bone");
-		cup_m[3] = engine.getMaterialFromName("SkulCup_m_Gem");
-		engine.setModelMaterialSlots("SkullCup", cup_m);
-		engine.setModelMaterialSlots("ground", cup_m);
-		engine.setModelMaterialSlots("Cube", cup_m);
+		//This is arguably unsafe, but the number of material slots can be grabbed by doing cup_m.size(), at least. Ill probably fix it in the future
+		cup_m->at(0) = engine.getMaterialFromName("SkulCup_m_Teeth");
+		cup_m->at(1) = engine.getMaterialFromName("SkulCup_m_Base");
+		cup_m->at(2) = engine.getMaterialFromName("SkulCup_m_Bone");
+		cup_m->at(3) = engine.getMaterialFromName("SkulCup_m_Gem");
 	}
 
-	//backpack material
-	auto backpack_m = engine.getModelMaterialSlots("Icosphere");
-	if (backpack_m.size())
+	//sphere and ground material
+	MaterialSlots sphere_m = engine.getModelMaterialSlots("Icosphere");
+	MaterialSlots ground_m = engine.getModelMaterialSlots("ground");
+	if (sphere_m)
 	{
-		backpack_m[0] = engine.getMaterialFromName("Backpack_m_Base");
-		engine.setModelMaterialSlots("Icosphere", backpack_m);
+		sphere_m->at(0) = engine.getMaterialFromName("Sphere_m_Sphere");
+		ground_m->at(0) = engine.getMaterialFromName("Sphere_m_Sphere");
 	}
 	
 	Renderer::ModelInstance icosphere(engine.getModelFromName("Icosphere"));

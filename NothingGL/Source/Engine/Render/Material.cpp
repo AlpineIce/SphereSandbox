@@ -7,6 +7,8 @@
 namespace Renderer
 {
 
+	unsigned int Material::defaultTex = 0;
+
 	//----------SHADER DEFINITIONS----------//
 
 	Shader::Shader(const char* vertexPath, const char* fragmentPath, Camera* camera)
@@ -261,7 +263,18 @@ namespace Renderer
 	Material::Material(MaterialType type, std::string path, Shader* shader)
 		: shader(shader)
 	{
-		
+		if (!defaultTex)
+		{
+			GLubyte imageData[4] = { 255, 255, 255, 255 };
+			glCreateTextures(GL_TEXTURE_2D, 1, &defaultTex);
+			glBindTexture(GL_TEXTURE_2D, defaultTex);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+
 		setTextureUniforms(type);
 		loadTextures(path);
 	}
@@ -323,22 +336,22 @@ namespace Renderer
 				{
 					if (entry.path().string().find("Albedo") != std::string::npos && uniforms.count(UniformVariable::ALBEDO))
 					{
-						this->textures[UniformVariable::ALBEDO] = std::make_shared<Texture>(entryPath, UniformVariable::ALBEDO);
+						textures[UniformVariable::ALBEDO] = std::make_shared<Texture>(entryPath, UniformVariable::ALBEDO);
 						continue;
 					}
 					if ((entry.path().string().find("Specular") != std::string::npos || entry.path().string().find("Metallic") != std::string::npos) && uniforms.count(UniformVariable::SPECULAR))
 					{
-						this->textures[UniformVariable::SPECULAR] = std::make_shared<Texture>(entryPath, UniformVariable::SPECULAR);
+						textures[UniformVariable::SPECULAR] = std::make_shared<Texture>(entryPath, UniformVariable::SPECULAR);
 						continue;
 					}
 					if (entry.path().string().find("Roughness") != std::string::npos && uniforms.count(UniformVariable::ROUGHNESS))
 					{
-						this->textures[UniformVariable::ROUGHNESS] = std::make_shared<Texture>(entryPath, UniformVariable::ROUGHNESS);
+						textures[UniformVariable::ROUGHNESS] = std::make_shared<Texture>(entryPath, UniformVariable::ROUGHNESS);
 						continue;
 					}
 					if (entry.path().string().find("Normal") != std::string::npos && uniforms.count(UniformVariable::NORMAL))
 					{
-						this->textures[UniformVariable::NORMAL] = std::make_shared<Texture>(entryPath, UniformVariable::NORMAL);
+						textures[UniformVariable::NORMAL] = std::make_shared<Texture>(entryPath, UniformVariable::NORMAL);
 						continue;
 					}
 				}
@@ -353,14 +366,26 @@ namespace Renderer
 	void Material::useMaterial()
 	{
 		shader->bind();
+		
+		for (int i = 0; i < MAX_TEXTURE_COUNT; i++) //clear all textures out 
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, defaultTex);
+			if (uniforms.count(UniformVariable(i)))
+			{
+				shader->setInt(uniforms.at(UniformVariable(i)), i);
+			}
+			
+		}
 		unsigned int texIndex = 0;
-		for (auto [key, val] : textures)
+		for (auto [key, val] : textures) //set which textures are loaded for the material
 		{
 			val->useTexture(texIndex);
 			shader->setInt(uniforms.at(UniformVariable(key)), texIndex);
 			
 			texIndex++;
 		}
+		
 	}
 
 	void Material::unbind()

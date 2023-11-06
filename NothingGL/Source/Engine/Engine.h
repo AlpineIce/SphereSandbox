@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+typedef std::map<unsigned int, Renderer::Material*>* MaterialSlots;
+
 class Engine
 {
 private:
@@ -33,18 +35,16 @@ public:
 	void loadMaterials(std::string materialsDir);
 
 	inline std::map<MaterialType, std::shared_ptr<Renderer::Shader>>*	getShaders() { return &shaders; }
-	inline Renderer::Shader*											getShaderByType(MaterialType type) { return shaders[type].get(); }
+	inline Renderer::Shader*											getShaderByType(MaterialType type) { return shaders.count(type) ? shaders[type].get() : NULL; }
 	inline std::map<std::string, std::shared_ptr<Renderer::Material>>*	getMaterials() { return &materials; }
 	inline std::map<std::string, std::shared_ptr<Renderer::Model>>*		getModels() { return &models; }
-	inline Renderer::Model*												getModelFromName(std::string name) { if (models.count(name)) return models[name].get(); }
-	inline Renderer::Material*											getMaterialFromName(std::string name) { if (materials.count(name)) return materials[name].get(); }
-	inline std::map<unsigned int, Renderer::Material*>					getModelMaterialSlots(std::string name) { if(models.count(name)) return models[name]->getMaterialSlots(); }
+	inline Renderer::Model*												getModelFromName(std::string name) { return models.count(name) ? models[name].get() : NULL; }
+	inline Renderer::Material*											getMaterialFromName(std::string name) { return materials.count(name) ? materials[name].get() : NULL; }
+	inline std::map<unsigned int, Renderer::Material*>*					getModelMaterialSlots(std::string name) { return models.count(name) ? models[name]->getMaterialSlots() : NULL; }
 	inline std::vector<std::shared_ptr<PointLight>>*					getPointLights() { return &pointLights; }
 	inline std::shared_ptr<DirectionalLight>							getDirectLight() { return directLight; }
-
 	inline Renderer::RenderEngine*										getRenderer() const { return renderer.get(); }
 
-	inline void setModelMaterialSlots(std::string name, std::map<unsigned int, Renderer::Material*> matSlots) { models[name]->setMaterialSlots(matSlots); }
 	inline void createDirectionalLight() { directLight = std::make_shared<DirectionalLight>(); }
 
 	void preRender();

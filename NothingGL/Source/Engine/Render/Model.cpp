@@ -45,18 +45,17 @@ namespace Renderer
 			int modelLoc = glGetUniformLocation(material->getShader()->getShaderID(), "model");
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix * instMatrix));
 
+			VA.bind();
+			glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+			VA.unbind();
+
+			material->unbind();
+
 		}
 		else
 		{
 			std::cout << "Error: No material is assigned to mesh at location " << this << " please assign a material for proper rendering" << "\n";
 		}
-		
-		
-		VA.bind();
-		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
-		VA.unbind();
-
-		material->unbind();
 	}
 
 	void Mesh::setTransformation(Transformation transform)
@@ -182,7 +181,6 @@ namespace Renderer
 		returnMesh.materialIndex = mesh->mMaterialIndex;
 		materialSlots[returnMesh.materialIndex] = nullptr;
 
-
 		return returnMesh;
 	}
 
@@ -191,7 +189,7 @@ namespace Renderer
 		unsigned int meshIndex = 0;
 		for (std::shared_ptr<Mesh> mesh : meshes)
 		{
-			mesh->draw(camera, instMatrix, materialSlots[mesh->getMaterialIndex()]);
+			mesh->draw(camera, instMatrix, materialSlots.at(mesh->getMaterialIndex()));
 			meshIndex++;
 		}
 	}
@@ -233,7 +231,13 @@ namespace Renderer
 
 	void ModelInstance::render(const Camera* camera)
 	{
-		parentModel->draw(*camera, modelMatrix);
+		if (parentModel != NULL)
+		{
+			parentModel->draw(*camera, modelMatrix);
+		}
+		else
+		{
+			std::cout << "Warning: model instance parent model isn't valid" << "\n";
+		}
 	}
-
 }
