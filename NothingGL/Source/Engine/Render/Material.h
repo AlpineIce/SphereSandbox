@@ -83,6 +83,7 @@ namespace Renderer
 		std::map<UniformVariable, std::shared_ptr<Texture>> textures;
 		std::map<UniformVariable, std::string> uniforms;
 		const unsigned int MAX_TEXTURE_COUNT = 4;
+		static unsigned int defaultAlbedo;
 		static unsigned int defaultTex;
 
 		void setTextureUniforms(MaterialType type);

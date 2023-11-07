@@ -8,6 +8,7 @@ namespace Renderer
 {
 
 	unsigned int Material::defaultTex = 0;
+	unsigned int Material::defaultAlbedo = 0;
 
 	//----------SHADER DEFINITIONS----------//
 
@@ -153,19 +154,19 @@ namespace Renderer
 		{
 			setFloat3("sun.rot", directLight->getShaderStruct().position); //note that position for directional light is actually rotation
 			setFloat3("sun.color", directLight->getShaderStruct().color);
-			setFloat("sun.power", directLight->getShaderStruct().power / 20.0f);
+			setFloat("sun.power", directLight->getShaderStruct().power);
 		}
 	}
 
 	void Shader::setFloat(const std::string& name, const float& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniform1f(location, value);
 	}
 
 	void Shader::setFloat2(const std::string& name, const glm::vec2& value)
 	{
-		int location = glGetUniformLocation(shader, name.data());
+		int location = checkUniform(name);
 		glUniform2f(location, value.x, value.y);
 	}
 
@@ -265,14 +266,27 @@ namespace Renderer
 	{
 		if (!defaultTex)
 		{
-			GLubyte imageData[4] = { 255, 255, 255, 255 };
+			GLubyte imageData[3] = { 0, 0, 0 };
 			glCreateTextures(GL_TEXTURE_2D, 1, &defaultTex);
 			glBindTexture(GL_TEXTURE_2D, defaultTex);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
 			glGenerateMipmap(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		if (!defaultAlbedo)
+		{
+			GLubyte imageData[3] = { 255, 255, 255 };
+			glCreateTextures(GL_TEXTURE_2D, 1, &defaultAlbedo);
+			glBindTexture(GL_TEXTURE_2D, defaultAlbedo);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 		setTextureUniforms(type);
@@ -367,7 +381,14 @@ namespace Renderer
 	{
 		shader->bind();
 		
-		for (int i = 0; i < MAX_TEXTURE_COUNT; i++) //clear all textures out 
+		glActiveTexture(GL_TEXTURE0);						//default albedo color
+		glBindTexture(GL_TEXTURE_2D, defaultAlbedo);
+		if (uniforms.count(UniformVariable(0)))
+		{
+			shader->setInt(uniforms.at(UniformVariable(0)), 0);
+		}
+
+		for (int i = 1; i < MAX_TEXTURE_COUNT; i++) //clear all textures out 
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, defaultTex);

@@ -12,6 +12,11 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+Bin/x64/Debug/Models/
+Bin/x64/Debug/Materials/
+Bin/x64/Debug/Intermediate/
+*.exe
+
 
 # Mono auto generated files
 mono_crash.*
@@ -20,7 +25,6 @@ mono_crash.*
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/

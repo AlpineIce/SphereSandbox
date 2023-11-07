@@ -23,10 +23,12 @@ int main()
 	//sphere and ground material
 	MaterialSlots sphere_m = engine.getModelMaterialSlots("Icosphere");
 	MaterialSlots ground_m = engine.getModelMaterialSlots("ground");
+	MaterialSlots cube_m = engine.getModelMaterialSlots("Cube");
 	if (sphere_m)
 	{
 		sphere_m->at(0) = engine.getMaterialFromName("Sphere_m_Sphere");
 		ground_m->at(0) = engine.getMaterialFromName("Sphere_m_Sphere");
+		cube_m->at(0) = engine.getMaterialFromName("Sphere_m_Sphere");
 	}
 	
 	Renderer::ModelInstance icosphere(engine.getModelFromName("Icosphere"));
