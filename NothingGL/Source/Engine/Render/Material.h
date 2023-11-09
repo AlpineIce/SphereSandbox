@@ -85,6 +85,7 @@ namespace Renderer
 		const unsigned int MAX_TEXTURE_COUNT = 4;
 		static unsigned int defaultAlbedo;
 		static unsigned int defaultTex;
+		static unsigned int defaultNormal;
 
 		void setTextureUniforms(MaterialType type);
 		void loadTextures(std::string path);

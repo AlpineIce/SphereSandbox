@@ -6,7 +6,7 @@
 Light::Light(glm::vec3 position)
 {
 	light.color = glm::vec3(1.0f);
-	light.power = 15.0f;
+	light.power = 20.0f;
 	light.position = position;
 }
 
@@ -38,6 +38,7 @@ void DirectionalLight::setRotation(float horizontalAngle, float verticalAngle)
 	
 	light.position.x = sin(glm::radians(horizontalAngle));
 	light.position.y = sin(glm::radians(verticalAngle));
+	light.position.z = cos(glm::radians(horizontalAngle));
 }
 
 //----------POINT LIGHT DEFINITIONS----------//

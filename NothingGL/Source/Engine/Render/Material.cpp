@@ -9,6 +9,7 @@ namespace Renderer
 
 	unsigned int Material::defaultTex = 0;
 	unsigned int Material::defaultAlbedo = 0;
+	unsigned int Material::defaultNormal = 0;
 
 	//----------SHADER DEFINITIONS----------//
 
@@ -270,7 +271,8 @@ namespace Renderer
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
@@ -282,7 +284,21 @@ namespace Renderer
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		if (!defaultNormal)
+		{
+			GLubyte imageData[3] = { 128, 128, 255 };
+			glCreateTextures(GL_TEXTURE_2D, 1, &defaultNormal);
+			glBindTexture(GL_TEXTURE_2D, defaultNormal);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
@@ -317,7 +333,7 @@ namespace Renderer
 				{
 					this->uniforms[UniformVariable::ROUGHNESS] = uniforms.at(i);
 				}
-				else if (uniforms.at(i) == "Normal")
+				else if (uniforms.at(i) == "NormalMap")
 				{
 					this->uniforms[UniformVariable::NORMAL] = uniforms.at(i);
 				}
@@ -376,35 +392,40 @@ namespace Renderer
 	}
 
 	void Material::useMaterial()
-	{
-		shader->bind();
-		
-		glActiveTexture(GL_TEXTURE0);						//default albedo color
+	{		
+		glActiveTexture(GL_TEXTURE0 + UniformVariable::ALBEDO);						//default albedo color
 		glBindTexture(GL_TEXTURE_2D, defaultAlbedo);
-		if (uniforms.count(UniformVariable(0)))
+		/*if (uniforms.count(UniformVariable::ALBEDO))
 		{
-			shader->setInt(uniforms.at(UniformVariable(0)), 0);
-		}
+			shader->setInt(uniforms.at(UniformVariable::ALBEDO), UniformVariable::ALBEDO);
+		}*/
 
-		for (int i = 1; i < MAX_TEXTURE_COUNT; i++) //clear all textures out 
+		glActiveTexture(GL_TEXTURE0 + UniformVariable::SPECULAR);					//default specular
+		glBindTexture(GL_TEXTURE_2D, defaultTex);
+		/*if (uniforms.count(UniformVariable::SPECULAR))
 		{
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, defaultTex);
-			if (uniforms.count(UniformVariable(i)))
-			{
-				shader->setInt(uniforms.at(UniformVariable(i)), i);
-			}
-			
-		}
-		unsigned int texIndex = 0;
+			shader->setInt(uniforms.at(UniformVariable::SPECULAR), UniformVariable::SPECULAR);
+		}*/
+
+		glActiveTexture(GL_TEXTURE0 + UniformVariable::ROUGHNESS);                  //default roughness and metallic
+		glBindTexture(GL_TEXTURE_2D, defaultTex);
+		/*if (uniforms.count(UniformVariable::ROUGHNESS))
+		{
+			shader->setInt(uniforms.at(UniformVariable::ROUGHNESS), UniformVariable::ROUGHNESS);
+		}*/
+		
+		glActiveTexture(GL_TEXTURE0 + UniformVariable::NORMAL);						//default normal
+		glBindTexture(GL_TEXTURE_2D, defaultNormal);
+		/*if (uniforms.count(UniformVariable::NORMAL))
+		{
+			shader->setInt(uniforms.at(UniformVariable::NORMAL), UniformVariable::NORMAL);
+		}*/
+
 		for (auto [key, val] : textures) //set which textures are loaded for the material
 		{
-			val->useTexture(texIndex);
-			shader->setInt(uniforms.at(UniformVariable(key)), texIndex);
-			
-			texIndex++;
+			val->useTexture(key);
+			shader->setInt(uniforms.at(UniformVariable(key)), key);
 		}
-		
 	}
 
 	void Material::unbind()
@@ -413,6 +434,5 @@ namespace Renderer
 		{
 			val->unbind();
 		}
-		shader->unbind();
 	}
 }

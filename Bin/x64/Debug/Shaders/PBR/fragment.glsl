@@ -89,7 +89,8 @@ vec3 CalcLight(Light light, vec3 normal, vec3 lightDir, vec3 viewDir, float F0)
 void main()
 {
     //normal mapping
-    vec3 normal = normalize(TBN * vec3(0.0, 0.0, 1.0));//texture(NormalMap, texCoord).rgb;
+    vec3 normal = texture(NormalMap, texCoord).xyz * 2.0 - 1.0;
+    normal = normalize(TBN * normal);
     vec3 viewDir = normalize(viewPos - fragPos);
 
     //surface reflection at zero incidence
@@ -97,7 +98,7 @@ void main()
     float avgAlbedo = (texture(Albedo, texCoord).x + texture(Albedo, texCoord).y + texture(Albedo, texCoord).z) / 3.0;
     F0 = mix(F0, avgAlbedo, texture(Metallic, texCoord).x);
 
-    vec3 sunLight = CalcLight(sun, normal, normalize(sun.pos), viewDir, F0); 
+    vec3 sunLight = CalcLight(sun, normal, normalize(sun.pos), viewDir, F0) * sun.power; 
     vec3 pointLightTotal = vec3(0.0);
     for(int i = 0; i < MAX_POINT_LIGHTS; i++)
     {
@@ -108,7 +109,7 @@ void main()
     }
     
     
-    vec3 totalLight = pointLightTotal;
+    vec3 totalLight = pointLightTotal + sunLight;
     float gamma = 2.2;
 
     fragColor = vec4(pow(totalLight, vec3(gamma)) + ambientLight, 1.0) * texture(Albedo, texCoord);

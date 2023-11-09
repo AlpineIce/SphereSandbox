@@ -33,19 +33,19 @@ namespace Renderer
 	{
 		if (bForwards)
 		{
-			translate(target * deltaTime * 5.0f);
+			translate(target * deltaTime * 8.0f);
 		}
 		if (bBackwards)
 		{
-			translate(-target * deltaTime * 5.0f);
+			translate(-target * deltaTime * 8.0f);
 		}
 		if (bLeft)
 		{
-			translate(-rightAxis * deltaTime * 5.0f);
+			translate(-rightAxis * deltaTime * 8.0f);
 		}
 		if (bRight)
 		{
-			translate(rightAxis * deltaTime * 5.0f);
+			translate(rightAxis * deltaTime * 8.0f);
 		}
 	}
 

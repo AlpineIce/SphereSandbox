@@ -17,7 +17,7 @@ public:
 	Light(glm::vec3 position);
 	virtual ~Light();
 
-	virtual ShaderStruct getShaderStruct() { return light; }
+	inline virtual ShaderStruct getShaderStruct() { return light; }
 };
 
 class DirectionalLight : public Light
@@ -40,5 +40,7 @@ public:
 	PointLight(glm::vec3 position);
 	PointLight(glm::vec3 position, glm::vec3 color);
 	~PointLight() override;
+
+	void setPosition(glm::vec3 position) { light.position = position; }
 
 };

@@ -52,12 +52,10 @@ int main()
 
 	//create some lights
 	engine.createDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f));
-	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(5.0f, 3.0f, 5.0f), glm::vec3(1.0f, 1.0f, 0.0f)));
-	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-5.0f, 3.0f, -5.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(5.0f, 3.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-5.0f, 3.0f, 5.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-
-	engine.getDirectLight()->setRotation(0.0f, 30.0f);
+	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(5.0f, 3.0f, 5.0f), glm::vec3(1.0f, 1.0f, 0.0f)));
+	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-5.0f, 3.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(5.0f, 3.0f, -5.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-5.0f, 3.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 
 	bool exitLoop = false;
 	while (!exitLoop)
@@ -68,21 +66,26 @@ int main()
 		engine.getShaderByType(MaterialType::PBR)->bind();
 		engine.getShaderByType(MaterialType::PBR)->setCameraPosition(engine.getRenderer()->getCamera()->getPosition());
 		engine.getShaderByType(MaterialType::PBR)->updateLights(*engine.getPointLights(), engine.getDirectLight());
-		engine.getShaderByType(MaterialType::PBR)->unbind();
-		
+		//engine.getShaderByType(MaterialType::PBR)->unbind();
+		engine.getDirectLight()->setRotation(*engine.time * 100.0f, 30.0f);
 
 		Renderer::Transformation modelTransform;
 		modelTransform.location = glm::vec3(sin(*engine.time) * 2.0f, cos(*engine.time) * 2.0f, 0.0f);
 		modelTransform.rotation = glm::quat(sin(*engine.time), 0.0f, cos(*engine.time), 0.0f);
+		testModel.setTransformation(modelTransform);
+
+		Renderer::Transformation model2Transform;
+		model2Transform.rotation = glm::quat(sin(*engine.time * 0.2f), 0.0f, cos(*engine.time * 0.2f), 0.0f);
+		testModel2.setTransformation(model2Transform);
 
 		icosphere.render(engine.getRenderer()->getCamera());
 		ground1.render(engine.getRenderer()->getCamera());
-		testModel.setTransformation(modelTransform);
+		
 		testModel.render(engine.getRenderer()->getCamera());
 		testModel2.render(engine.getRenderer()->getCamera());
 		bruhcube.render(engine.getRenderer()->getCamera());
 
-
+		engine.getShaderByType(MaterialType::PBR)->unbind();
 		engine.postRender();
 		//maybe some game specific shit idk
 		exitLoop = engine.checkShouldClose();
