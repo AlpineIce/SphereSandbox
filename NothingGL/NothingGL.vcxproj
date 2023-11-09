@@ -29,7 +29,6 @@
     <ClCompile Include="Source\Engine\Render\Renderer.cpp" />
     <ClCompile Include="Source\Engine\Render\Material.cpp" />
     <ClCompile Include="Source\Engine\Render\Texture.cpp" />
-    <ClCompile Include="Source\Engine\Render\UniformBuffer.cpp" />
     <ClCompile Include="Source\Engine\Render\VertexArray.cpp" />
     <ClCompile Include="Source\Engine\Render\Vertexbuffer.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -45,7 +44,6 @@
     <ClInclude Include="Source\Engine\Render\Renderer.h" />
     <ClInclude Include="Source\Engine\Render\Material.h" />
     <ClInclude Include="Source\Engine\Render\Texture.h" />
-    <ClInclude Include="Source\Engine\Render\UniformBuffer.h" />
     <ClInclude Include="Source\Engine\Render\VertexArray.h" />
     <ClInclude Include="Source\Engine\Render\Vertexbuffer.h" />
   </ItemGroup>

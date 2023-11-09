@@ -46,6 +46,7 @@ public:
 	inline Renderer::RenderEngine*										getRenderer() const { return renderer.get(); }
 
 	inline void createDirectionalLight() { directLight = std::make_shared<DirectionalLight>(); }
+	inline void createDirectionalLight(glm::vec3 color) { directLight = std::make_shared<DirectionalLight>(color); }
 
 	void preRender();
 	void postRender();

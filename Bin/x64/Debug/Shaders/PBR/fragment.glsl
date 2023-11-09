@@ -1,39 +1,30 @@
 #version 400 core
 
-in vec3 normal;
 in vec2 texCoord;
 in vec3 fragPos;  
+in mat3 TBN;
 
 out vec4 fragColor;
 
 #define PI 3.1415926
-#define MAX_POINT_LIGHTS 32
+#define MAX_POINT_LIGHTS 4
 
 uniform sampler2D Albedo;
 uniform sampler2D Metallic; //todo make specular and metallic work seperately, also give shininess to material
 uniform sampler2D Roughness;
-uniform sampler2D Normal;
+uniform sampler2D NormalMap;
 uniform sampler2D AO;
 
-struct directionalLight
-{
-    vec3 rot;
-    float power;
-    vec3 color;
-};
-
-struct pointLight
+struct Light
 {
     vec3 pos;
-    vec3 color;
     float power;
-    float constant;
-    float linear;
-    float quad;  
+    vec3 color;
 };
 
-uniform directionalLight sun;
-uniform pointLight[4] pLights;
+uniform vec3 ambientLight = vec3(0.0, 0.0, 0.0);
+uniform Light sun;
+uniform Light[4] pLights;
 uniform vec3 cameraPos;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -72,77 +63,53 @@ float GeometryOcclusion(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
-vec3 CalcDirLight(directionalLight light, vec3 normal, vec3 viewDir, vec3 F0)
+vec3 CalcLight(Light light, vec3 normal, vec3 lightDir, vec3 viewDir, float F0)
 {
-    //light direction and reflection
-    vec3 lightDir = normalize(light.rot);
+    //light direction
     vec3 H = normalize(viewDir + lightDir);
-    vec3 radiance = light.color * light.power;
 
+    //roughness
     float NDF = NormalDistribution(normal, H, texture(Roughness, texCoord).x);       
     float G = GeometryOcclusion(normal, viewDir, lightDir, texture(Roughness, texCoord).x);
-    vec3 fresnel = vec3(F0.x) + (1.0 - F0) * pow(1.0 - max(dot(H, viewDir), 0.0), 5.0);       
-        
-    vec3 kS = fresnel;
-    vec3 kD = vec3(1.0) - kS;
+
+    //specular
+    float kS = F0 + (1.0 - F0) * pow(1.0 - max(dot(H, viewDir), 0.0), 5.0);
+    float kD = 1.0 - kS;
     kD *= 1.0 - texture(Metallic, texCoord).x;	 
 
-    vec3 numerator = NDF * G * fresnel;
+    float numerator = NDF * G * kS;
     float denominator = 8.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0)  + 0.0001;
-    vec3 specular = numerator / denominator;  
+    float specular = numerator / denominator;  
 
     float NdotL = max(dot(normal, lightDir), 0.0);
 
-    return ((kD * texture(Albedo, texCoord).xyz / PI + specular) * radiance * NdotL);
-}  
-
-vec3 CalcPointLight(pointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 F0)
-{
-    //light direction and reflection
-    vec3 lightDir = normalize(light.pos - fragPos);
-    vec3 H = normalize(viewDir + lightDir);
-    float distance = length(light.pos - fragPos);
-    float attenuation = 1.0 / (distance * distance);
-    vec3 radiance = light.color * attenuation * light.power;
-
-    float NDF = NormalDistribution(normal, H, texture(Roughness, texCoord).x);       
-    float G = GeometryOcclusion(normal, viewDir, lightDir, texture(Roughness, texCoord).x);
-    vec3 fresnel = vec3(F0.x) + (1.0 - F0) * pow(1.0 - max(dot(H, viewDir), 0.0), 5.0);       
-        
-    vec3 kS = fresnel;
-    vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - texture(Metallic, texCoord).x;	 
-
-    vec3 numerator = NDF * G * fresnel;
-    float denominator = 8.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0)  + 0.0001;
-    vec3 specular = numerator / denominator;  
-
-    float NdotL = max(dot(normal, lightDir), 0.0);
-
-    return ((kD * texture(Albedo, texCoord).xyz / PI + specular) * radiance * NdotL);
+    return ((kD / PI + specular) * light.color * NdotL);
 }
 
 void main()
 {
-    vec3 norm = normalize(normal);
+    //normal mapping
+    vec3 normal = normalize(TBN * vec3(0.0, 0.0, 1.0));//texture(NormalMap, texCoord).rgb;
     vec3 viewDir = normalize(viewPos - fragPos);
 
     //surface reflection at zero incidence
-    vec3 F0 = vec3(0.04); 
-    F0 = mix(F0, texture(Albedo, texCoord).xyz, texture(Metallic, texCoord).xyz);
+    float F0 = 0.04; 
+    float avgAlbedo = (texture(Albedo, texCoord).x + texture(Albedo, texCoord).y + texture(Albedo, texCoord).z) / 3.0;
+    F0 = mix(F0, avgAlbedo, texture(Metallic, texCoord).x);
 
-    vec3 sunLight = CalcDirLight(sun, norm, viewDir, F0); 
-
-    int lightCount = 1;
+    vec3 sunLight = CalcLight(sun, normal, normalize(sun.pos), viewDir, F0); 
     vec3 pointLightTotal = vec3(0.0);
     for(int i = 0; i < MAX_POINT_LIGHTS; i++)
     {
-        pointLightTotal += CalcPointLight(pLights[i], norm, fragPos, viewDir, F0);
+        float distance = length(pLights[i].pos - fragPos);
+        float falloff = 1.0 / pLights[i].power;
+        float attenuation = max(1.0 / (distance + 1.0) * pLights[i].power, 1.0);
+        pointLightTotal += CalcLight(pLights[i], normal, normalize(pLights[i].pos - fragPos), viewDir, F0) * attenuation;
     }
-    vec3 totalLight = pointLightTotal + sunLight;
+    
+    
+    vec3 totalLight = pointLightTotal;
+    float gamma = 2.2;
 
-    fragColor = vec4(totalLight, 1.0);
-
-    //vec3 color = (pointLightTotal + sunLight) / ((pointLightTotal + sunLight) + vec3(2.0));
-    //vec3 color = pow((pointLightTotal + sunLight), vec3(1.0/2.2));
+    fragColor = vec4(pow(totalLight, vec3(gamma)) + ambientLight, 1.0) * texture(Albedo, texCoord);
 }

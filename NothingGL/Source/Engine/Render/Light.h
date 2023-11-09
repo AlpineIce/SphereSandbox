@@ -26,6 +26,7 @@ private:
 
 public:
 	DirectionalLight();
+	DirectionalLight(glm::vec3 color);
 	~DirectionalLight() override;
 
 	void setRotation(float horizontalAngle, float verticalAngle); //angles in degrees
@@ -37,6 +38,7 @@ private:
 
 public:
 	PointLight(glm::vec3 position);
+	PointLight(glm::vec3 position, glm::vec3 color);
 	~PointLight() override;
 
 };

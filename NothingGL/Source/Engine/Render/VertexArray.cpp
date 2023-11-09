@@ -39,8 +39,17 @@ namespace Renderer
 
 		//texture coordinates
 		glEnableVertexAttribArray(VBindex);
-		int a = offsetof(Vertex, texCoords);
 		glVertexAttribPointer(VBindex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+		VBindex++;
+
+		//tangents
+		glEnableVertexAttribArray(VBindex);
+		glVertexAttribPointer(VBindex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangents));
+		VBindex++;
+
+		//bitangents
+		glEnableVertexAttribArray(VBindex);
+		glVertexAttribPointer(VBindex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangents));
 		VBindex++;
 	
 		vertexBuffers.push_back(vb);

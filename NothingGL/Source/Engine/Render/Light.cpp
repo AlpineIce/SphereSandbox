@@ -6,7 +6,7 @@
 Light::Light(glm::vec3 position)
 {
 	light.color = glm::vec3(1.0f);
-	light.power = 50.0f;
+	light.power = 15.0f;
 	light.position = position;
 }
 
@@ -20,6 +20,13 @@ DirectionalLight::DirectionalLight()
 	:Light(glm::vec3(0.0, 1.0, 1.0f)) //directional light pointing straight down on init
 {
 	light.power = 3.0f;
+}
+
+DirectionalLight::DirectionalLight(glm::vec3 color)
+	:Light(glm::vec3(0.0, 1.0, 1.0f)) //directional light pointing straight down on init
+{
+	light.power = 3.0f;
+	light.color = color;
 }
 
 DirectionalLight::~DirectionalLight()
@@ -38,6 +45,12 @@ void DirectionalLight::setRotation(float horizontalAngle, float verticalAngle)
 PointLight::PointLight(glm::vec3 position)
 	:Light(position)
 {
+}
+
+PointLight::PointLight(glm::vec3 position, glm::vec3 color)
+	:Light(position)
+{
+	light.color = color;
 }
 
 PointLight::~PointLight()

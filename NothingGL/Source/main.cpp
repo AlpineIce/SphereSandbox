@@ -20,7 +20,7 @@ int main()
 		cup_m->at(3) = engine.getMaterialFromName("SkulCup_m_Gem");
 	}
 
-	//sphere and ground material
+	//sphere, ground, and cube material
 	MaterialSlots sphere_m = engine.getModelMaterialSlots("Icosphere");
 	MaterialSlots ground_m = engine.getModelMaterialSlots("ground");
 	MaterialSlots cube_m = engine.getModelMaterialSlots("Cube");
@@ -51,9 +51,11 @@ int main()
 	ground1.setTransformation(groundTransform);
 
 	//create some lights
-	engine.createDirectionalLight();
-	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(5.0f, -3.5f, 0.0f)));
-	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-2.0f, -3.0f, -4.0f)));
+	engine.createDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(5.0f, 3.0f, 5.0f), glm::vec3(1.0f, 1.0f, 0.0f)));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-5.0f, 3.0f, -5.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(5.0f, 3.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-5.0f, 3.0f, 5.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
 	engine.getDirectLight()->setRotation(0.0f, 30.0f);
 

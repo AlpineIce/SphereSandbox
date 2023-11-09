@@ -33,8 +33,8 @@ namespace Renderer
 		if (material)
 		{
 			material->useMaterial();
-			glm::mat3 normalMat = glm::inverseTranspose(modelMatrix * instMatrix);
-			material->getShader()->setMat3("normalMat", normalMat);
+			glm::mat3 transposeMat = glm::inverseTranspose(modelMatrix * instMatrix);
+			material->getShader()->setMat3("transposeMat", transposeMat);
 
 			int projectionLoc = glGetUniformLocation(material->getShader()->getShaderID(), "projection");
 			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(camera.getProjection()));
@@ -109,7 +109,7 @@ namespace Renderer
 	void Model::loadModel(std::string path)
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
@@ -153,8 +153,13 @@ namespace Renderer
 			aiVector3D position = mesh->mVertices[i];
 			aiVector3D normal = mesh->mNormals[i];
 			aiVector3D texCoords = mesh->mTextureCoords[0][i];
+			aiVector3D tangents = mesh->mBitangents[i];
+			aiVector3D bitangents = mesh->mTangents[i];
 			vertex.positions = { position.x, position.y, position.z };
 			vertex.normals = { normal.x, normal.y, normal.z };
+			
+
+			//texture coordinates
 			if (mesh->mTextureCoords[0])
 			{
 				vertex.texCoords = { texCoords.x, texCoords.y };
@@ -163,6 +168,27 @@ namespace Renderer
 			{
 				vertex.texCoords = { 0.0f, 0.0f };
 			}
+
+			//tangents
+			if (mesh->mTextureCoords[0])
+			{
+				vertex.tangents = { tangents.x, tangents.y, tangents.z };
+			}
+			else
+			{
+				vertex.tangents = { 0.0f, 0.0f, 0.0f };
+			}
+
+			//bitangents
+			if (mesh->mTextureCoords[0])
+			{
+				vertex.bitangents = { bitangents.x, bitangents.y, bitangents.z };
+			}
+			else
+			{
+				vertex.bitangents = { 0.0f, 0.0f, 0.0f };
+			}
+
 
 			returnMesh.vertices.push_back(vertex);
 		}

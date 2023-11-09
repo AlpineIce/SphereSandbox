@@ -12,6 +12,8 @@ namespace Renderer
 		glm::vec3 positions;
 		glm::vec3 normals;
 		glm::vec2 texCoords;
+		glm::vec3 tangents;
+		glm::vec3 bitangents;
 	};
 
 

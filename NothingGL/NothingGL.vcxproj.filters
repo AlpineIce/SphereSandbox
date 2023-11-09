@@ -69,9 +69,6 @@
     <ClCompile Include="Source\Engine\Actors\Components\ModelComponent.cpp">
       <Filter>Source Files\Engine\Actor\ActorComponents</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Render\UniformBuffer.cpp">
-      <Filter>Source Files\Engine\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Engine\Render\Light.cpp">
       <Filter>Source Files\Engine\Render</Filter>
     </ClCompile>
@@ -109,9 +106,6 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Actors\Components\ModelComponent.h">
       <Filter>Source Files\Engine\Actor\ActorComponents</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Engine\Render\UniformBuffer.h">
-      <Filter>Source Files\Engine\Render</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\Render\Light.h">
       <Filter>Source Files\Engine\Render</Filter>

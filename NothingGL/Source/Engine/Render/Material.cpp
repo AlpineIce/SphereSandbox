@@ -136,12 +136,10 @@ namespace Renderer
 		{
 			if (light.get() != NULL && i < MAX_POINT_LIGHTS) //point light must be valid
 			{
+				auto a = light->getShaderStruct().position;
 				setFloat3(std::string("pLights[") + std::to_string(i) + std::string("].pos"), light->getShaderStruct().position);
 				setFloat3(std::string("pLights[") + std::to_string(i) + std::string("].color"), light->getShaderStruct().color);
 				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].power"), light->getShaderStruct().power);
-				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].constant"), 1.0f);	//TODO FIGURE OUT WHY THE LAST 3 VARIABLES WONT WORK AT ALL
-				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].linear"), 0.05f);		
-				setFloat(std::string("pLights[") + std::to_string(i) + std::string("].quad"), 0.0f);
 				i++;
 			}
 			else
@@ -152,7 +150,7 @@ namespace Renderer
 
 		if (directLight.get() != NULL) //directional light must be valid
 		{
-			setFloat3("sun.rot", directLight->getShaderStruct().position); //note that position for directional light is actually rotation
+			setFloat3("sun.pos", directLight->getShaderStruct().position); //note that position for directional light is actually rotation
 			setFloat3("sun.color", directLight->getShaderStruct().color);
 			setFloat("sun.power", directLight->getShaderStruct().power);
 		}
