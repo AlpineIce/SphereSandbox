@@ -57,3 +57,26 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color)
 PointLight::~PointLight()
 {
 }
+
+//----------AMBIENT LIGHT DEFINITIONS----------//
+
+AmbientLight::AmbientLight()
+{
+	color = { 1.0f, 1.0f, 1.0f };
+	strength = 1.0f;
+}
+
+AmbientLight::AmbientLight(glm::vec3 color)
+	:color(color)
+{
+	strength = 1.0f;
+}
+
+AmbientLight::~AmbientLight()
+{
+}
+
+glm::vec3 AmbientLight::getAmbientLight()
+{
+	return color * strength * 0.1f; //multiply by 0.1 to bring down the ambient light so that strength is a more realistic variable
+}

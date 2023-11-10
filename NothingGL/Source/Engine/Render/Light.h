@@ -18,6 +18,7 @@ public:
 	virtual ~Light();
 
 	inline virtual ShaderStruct getShaderStruct() { return light; }
+	inline virtual void setPower(float power) { light.power = power; }
 };
 
 class DirectionalLight : public Light
@@ -43,4 +44,19 @@ public:
 
 	void setPosition(glm::vec3 position) { light.position = position; }
 
+};
+
+class AmbientLight
+{
+private:
+	glm::vec3 color;
+	float strength;
+
+public:
+	AmbientLight();
+	AmbientLight(glm::vec3 color);
+	~AmbientLight();
+
+	glm::vec3 getAmbientLight();
+	inline void setPower(float power) { strength = power; }
 };

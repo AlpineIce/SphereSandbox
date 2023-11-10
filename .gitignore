@@ -12,6 +12,7 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+Bin/x64/Release/
 Bin/x64/Debug/Models/
 Bin/x64/Debug/Materials/
 Bin/x64/Debug/Intermediate/

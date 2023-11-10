@@ -49,7 +49,7 @@ namespace Renderer
 			glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 			VA.unbind();
 
-			material->unbind();
+			//material->unbind();
 
 		}
 		else

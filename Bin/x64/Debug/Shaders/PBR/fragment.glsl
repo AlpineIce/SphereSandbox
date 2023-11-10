@@ -22,7 +22,7 @@ struct Light
     vec3 color;
 };
 
-uniform vec3 ambientLight = vec3(0.0, 0.0, 0.0);
+uniform vec3 ambientLight;
 uniform Light sun;
 uniform Light[4] pLights;
 uniform vec3 cameraPos;

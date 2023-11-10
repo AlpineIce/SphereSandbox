@@ -128,12 +128,12 @@ namespace Renderer
 		setFloat3("viewPos", position);
 	}
 
-	void Shader::updateLights(const std::vector<std::shared_ptr<PointLight>>& lights, const std::shared_ptr<DirectionalLight>& directLight)
+	void Shader::updateLights(const std::vector<std::shared_ptr<PointLight>>* lights, const std::shared_ptr<DirectionalLight>& directLight, const std::shared_ptr<AmbientLight>& ambientLight)
 	{
 		const unsigned int MAX_POINT_LIGHTS = 4; //relates to the defined maximum point lights in the PBR shader
 		unsigned int i = 0;
 		
-		for (std::shared_ptr<PointLight> light : lights)
+		for (const std::shared_ptr<PointLight> light : *lights)
 		{
 			if (light.get() != NULL && i < MAX_POINT_LIGHTS) //point light must be valid
 			{
@@ -149,11 +149,16 @@ namespace Renderer
 			}
 		}
 
-		if (directLight.get() != NULL) //directional light must be valid
+		if (directLight.get()) //directional light must be valid
 		{
 			setFloat3("sun.pos", directLight->getShaderStruct().position); //note that position for directional light is actually rotation
 			setFloat3("sun.color", directLight->getShaderStruct().color);
 			setFloat("sun.power", directLight->getShaderStruct().power);
+		}
+
+		if (ambientLight.get())
+		{
+			setFloat3("ambientLight", ambientLight->getAmbientLight());
 		}
 	}
 
@@ -263,7 +268,8 @@ namespace Renderer
 	Material::Material(MaterialType type, std::string path, Shader* shader)
 		: shader(shader)
 	{
-		if (!defaultTex)
+		//all of this could definitely be reworked. All valid opengl textures have a value greater than 0 though which is what's being checked
+		if (!defaultTex) //texture for metallic and roughness
 		{
 			GLubyte imageData[3] = { 0, 0, 0 };
 			glCreateTextures(GL_TEXTURE_2D, 1, &defaultTex);
@@ -392,39 +398,45 @@ namespace Renderer
 	}
 
 	void Material::useMaterial()
-	{		
-		glActiveTexture(GL_TEXTURE0 + UniformVariable::ALBEDO);						//default albedo color
-		glBindTexture(GL_TEXTURE_2D, defaultAlbedo);
-		/*if (uniforms.count(UniformVariable::ALBEDO))
+	{	
+		//set which textures are loaded for the material first
+		std::vector<unsigned int> usedMaterials(4);
+		for (auto [key, val] : textures) 
 		{
-			shader->setInt(uniforms.at(UniformVariable::ALBEDO), UniformVariable::ALBEDO);
-		}*/
-
-		glActiveTexture(GL_TEXTURE0 + UniformVariable::SPECULAR);					//default specular
-		glBindTexture(GL_TEXTURE_2D, defaultTex);
-		/*if (uniforms.count(UniformVariable::SPECULAR))
-		{
-			shader->setInt(uniforms.at(UniformVariable::SPECULAR), UniformVariable::SPECULAR);
-		}*/
-
-		glActiveTexture(GL_TEXTURE0 + UniformVariable::ROUGHNESS);                  //default roughness and metallic
-		glBindTexture(GL_TEXTURE_2D, defaultTex);
-		/*if (uniforms.count(UniformVariable::ROUGHNESS))
-		{
-			shader->setInt(uniforms.at(UniformVariable::ROUGHNESS), UniformVariable::ROUGHNESS);
-		}*/
-		
-		glActiveTexture(GL_TEXTURE0 + UniformVariable::NORMAL);						//default normal
-		glBindTexture(GL_TEXTURE_2D, defaultNormal);
-		/*if (uniforms.count(UniformVariable::NORMAL))
-		{
-			shader->setInt(uniforms.at(UniformVariable::NORMAL), UniformVariable::NORMAL);
-		}*/
-
-		for (auto [key, val] : textures) //set which textures are loaded for the material
-		{
+			usedMaterials[key] = 1;
 			val->useTexture(key);
 			shader->setInt(uniforms.at(UniformVariable(key)), key);
+		}
+
+		//then fill in which textures arent loaded with defaults setup on init
+		for (int i = 0; i < usedMaterials.size(); i++)
+		{
+			if (usedMaterials[i] != 1)
+			{
+				switch (i)
+				{
+				case UniformVariable::ALBEDO:
+					glActiveTexture(GL_TEXTURE0 + UniformVariable::ALBEDO);
+					glBindTexture(GL_TEXTURE_2D, defaultAlbedo);
+
+					break;
+				case UniformVariable::SPECULAR:
+					glActiveTexture(GL_TEXTURE0 + UniformVariable::SPECULAR);
+					glBindTexture(GL_TEXTURE_2D, defaultTex);
+
+					break;
+				case UniformVariable::ROUGHNESS:
+					glActiveTexture(GL_TEXTURE0 + UniformVariable::ROUGHNESS);
+					glBindTexture(GL_TEXTURE_2D, defaultTex);
+
+					break;
+				case UniformVariable::NORMAL:
+					glActiveTexture(GL_TEXTURE0 + UniformVariable::NORMAL);
+					glBindTexture(GL_TEXTURE_2D, defaultNormal);
+
+					break;
+				}
+			}
 		}
 	}
 
