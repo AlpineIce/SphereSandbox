@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Source\Engine\Actors\Actor.cpp" />
     <ClCompile Include="Source\Engine\Actors\Components\ModelComponent.cpp" />
+    <ClCompile Include="Source\Engine\Actors\PhysicalActor.cpp" />
     <ClCompile Include="Source\Engine\Engine.cpp" />
     <ClCompile Include="Source\Engine\Render\Camera.cpp" />
     <ClCompile Include="Source\Engine\Render\Indexbuffer.cpp" />
@@ -36,6 +37,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Engine\Actors\Actor.h" />
     <ClInclude Include="Source\Engine\Actors\Components\ModelComponent.h" />
+    <ClInclude Include="Source\Engine\Actors\PhysicalActor.h" />
     <ClInclude Include="Source\Engine\Engine.h" />
     <ClInclude Include="Source\Engine\Render\Camera.h" />
     <ClInclude Include="Source\Engine\Render\Indexbuffer.h" />

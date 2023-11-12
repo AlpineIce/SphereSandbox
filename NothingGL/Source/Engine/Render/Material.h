@@ -1,20 +1,19 @@
 #pragma once
+#include "Texture.h"
+#include "Camera.h"
+#include "Light.h"
+
 #include <string>
 #include <vector>
 #include <map>
 #include <string>
 #include <memory>
 
-#include "Texture.h"
-#include "Camera.h"
-#include "Light.h"
-
-#include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "GLM/glm.hpp"
 #include "GLM/gtc/matrix_transform.hpp"
 
-enum MaterialType
+enum ShaderType
 {
 	PBR = 0
 };
@@ -87,17 +86,17 @@ namespace Renderer
 		static unsigned int defaultTex;
 		static unsigned int defaultNormal;
 
-		void setTextureUniforms(MaterialType type);
+		void setTextureUniforms(ShaderType type);
 		void loadTextures(std::string path);
 		
 	public:
-		Material(MaterialType type, std::string path, Shader* shaderBase);
+		Material(ShaderType type, std::string path, Shader* shaderBase);
 		~Material();
 
-		void useMaterial();
-		void unbind();
+		void useMaterial() const;
+		void unbind() const;
 
-		inline Shader* getShader() { return shader; }
+		inline Shader* getShader() const { return shader; }
 	};
 
 }

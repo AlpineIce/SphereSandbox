@@ -26,7 +26,7 @@ namespace Renderer
 		VA.addBuffer(VB);
 	}
 
-	void Mesh::draw(const Camera& camera, glm::mat4& instMatrix, Material* material)
+	void Mesh::draw(const Camera& camera, const glm::mat4& instMatrix, const Material* material) const
 	{
 		glm::mat4 modelMatrix = getModelMatrix();
 
@@ -48,9 +48,6 @@ namespace Renderer
 			VA.bind();
 			glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 			VA.unbind();
-
-			//material->unbind();
-
 		}
 		else
 		{
@@ -75,7 +72,7 @@ namespace Renderer
 		this->materialIndex = materialIndex;
 	}
 
-	glm::mat4 Mesh::getModelMatrix()
+	glm::mat4 Mesh::getModelMatrix() const
 	{
 		glm::mat4 translate = glm::translate(glm::mat4(1.0f), this->transformation.location);
 		glm::mat4 rotate = glm::mat4_cast(this->transformation.rotation);
@@ -210,7 +207,7 @@ namespace Renderer
 		return returnMesh;
 	}
 
-	void Model::draw(const Camera& camera, glm::mat4& instMatrix)
+	void Model::draw(const Camera& camera, const glm::mat4& instMatrix) const
 	{
 		unsigned int meshIndex = 0;
 		for (std::shared_ptr<Mesh> mesh : meshes)
@@ -230,7 +227,7 @@ namespace Renderer
 
 	//----------MODEL INSTANCE DEFINITIONS----------//
 
-	ModelInstance::ModelInstance(Model* model)
+	ModelInstance::ModelInstance(const Model* model)
 		:parentModel(model)
 	{
 		modelMatrix = getMatrix();
@@ -255,7 +252,7 @@ namespace Renderer
 		this->modelMatrix = getMatrix();
 	}
 
-	void ModelInstance::render(const Camera* camera)
+	void ModelInstance::render(const Camera* camera) const
 	{
 		if (parentModel != NULL)
 		{

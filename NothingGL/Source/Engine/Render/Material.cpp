@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "GL/glew.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -265,7 +266,7 @@ namespace Renderer
 
 	
 
-	Material::Material(MaterialType type, std::string path, Shader* shader)
+	Material::Material(ShaderType type, std::string path, Shader* shader)
 		: shader(shader)
 	{
 		//all of this could definitely be reworked. All valid opengl textures have a value greater than 0 though which is what's being checked
@@ -317,9 +318,9 @@ namespace Renderer
 	{
 	}
 
-	void Material::setTextureUniforms(MaterialType type)
+	void Material::setTextureUniforms(ShaderType type)
 	{
-		if (type == MaterialType::PBR)
+		if (type == ShaderType::PBR)
 		{
 			shader->bind();
 			std::vector<std::string> uniforms = shader->getUniforms();
@@ -397,7 +398,7 @@ namespace Renderer
 		}
 	}
 
-	void Material::useMaterial()
+	void Material::useMaterial() const
 	{	
 		//set which textures are loaded for the material first
 		std::vector<unsigned int> usedMaterials(4);
@@ -440,7 +441,7 @@ namespace Renderer
 		}
 	}
 
-	void Material::unbind()
+	void Material::unbind() const
 	{
 		for (auto [key, val] : textures)
 		{

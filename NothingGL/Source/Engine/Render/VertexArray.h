@@ -24,8 +24,8 @@ namespace Renderer
 		void createBuffer();
 		void addBuffer(VertexBuffer& vertexbuffer);
 		void setIndexBuffer(IndexBuffer& ib);
-		void bind();
-		void unbind();
+		void bind() const;
+		void unbind() const;
 
 		const unsigned int& getVAO() { return VAO; }
 	};

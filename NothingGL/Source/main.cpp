@@ -1,28 +1,30 @@
 #include <iostream>
-#include "Engine/Engine.h"
 #include <math.h>
+#include <thread>
+
+#include "Actors/PhysicalActor.h"
+#include "Engine/Engine.h"
 
 int main()
 {
+	//TODO load all 3 in different threads, syncing when loadedf
 	Engine engine;
 	engine.loadShaders("Shaders");
 	engine.loadModels("Models");
 	engine.loadMaterials("Materials");
 
-	//skull cup materials
+	//Material setup. This is kind of unsafe, but the number of material slots
+	//can be grabbed by doing cup_m.size(), at least. Ill probably fix it in the future
 	MaterialSlots cup_m = engine.getModelMaterialSlots("SkullCup");
-	if (cup_m) //TODO TURN THIS INTO A FUNCTION WHICH TAKES IN A LIST OF STRINGS AS MATERIAL NAMES
+	if (cup_m)
 	{
-		//This is arguably unsafe, but the number of material slots can be grabbed by doing cup_m.size(), at least. Ill probably fix it in the future
 		cup_m->at(0) = engine.getMaterialFromName("SkulCup_m_Teeth");
 		cup_m->at(1) = engine.getMaterialFromName("SkulCup_m_Base");
 		cup_m->at(2) = engine.getMaterialFromName("SkulCup_m_Bone");
 		cup_m->at(3) = engine.getMaterialFromName("SkulCup_m_Gem");
 	}
 
-	//sphere and cube material
 	MaterialSlots sphere_m = engine.getModelMaterialSlots("Icosphere");
-	
 	MaterialSlots cube_m = engine.getModelMaterialSlots("Cube");
 	if (sphere_m)
 	{
@@ -35,22 +37,24 @@ int main()
 	{
 		landscape_m->at(0) = engine.getMaterialFromName("Landscape_m_Grass");
 	}
-	
-	Renderer::ModelInstance icosphere(engine.getModelFromName("Icosphere"));
-	Renderer::ModelInstance testModel(engine.getModelFromName("SkullCup"));
-	Renderer::ModelInstance testModel2(engine.getModelFromName("SkullCup"));
-	Renderer::ModelInstance landscape(engine.getModelFromName("Landscape"));
-	Renderer::ModelInstance bruhcube(engine.getModelFromName("Cube"));
 
-	Renderer::Transformation cubeTransform;
+	//creation of actors
+	std::unique_ptr<Actor::PhysicalActor> icosphere = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine);
+	std::unique_ptr<Actor::PhysicalActor> testModel = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine);
+	std::unique_ptr<Actor::PhysicalActor> testModel2 = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine);
+	std::unique_ptr<Actor::PhysicalActor> landscape = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine);
+	std::unique_ptr<Actor::PhysicalActor> bruhcube = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Cube"), &engine);
+
+
+	Actor::Transformation cubeTransform;
 	cubeTransform.location = { 5.0f, 3.0f, 0.0f };
-	bruhcube.setTransformation(cubeTransform);
+	bruhcube->transform(cubeTransform);
 
-	Renderer::Transformation sphereTransform;
+	Actor::Transformation sphereTransform;
 	sphereTransform.location = { -5.0f, 3.0f, 0.0f };
-	icosphere.setTransformation(sphereTransform);
+	icosphere->transform(sphereTransform);
 
-	//create some lights
+	//create some lights //TODO TURN THESE INTO ACTORS ALSO
 	engine.createDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f));
 	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 0.0f)));
 	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -62,37 +66,30 @@ int main()
 	engine.getAmbientLight()->setPower(1.5f);
 
 	bool exitLoop = false;
+	unsigned long frameNum = 0;
 	while (!exitLoop)
 	{
-		engine.preRender();
-		
-		//TODO possibly launch these 4 lines in a thread and do other transformations on main thread?
-		engine.getShaderByType(MaterialType::PBR)->bind();
-		engine.getShaderByType(MaterialType::PBR)->setCameraPosition(engine.getRenderer()->getCamera()->getPosition());
-		engine.getShaderByType(MaterialType::PBR)->updateLights(engine.getPointLights(), engine.getDirectLight(), engine.getAmbientLight());
-		//engine.getShaderByType(MaterialType::PBR)->unbind();
-		
+		//debug if statement 
+		if (frameNum == 1000)
+		{
+			bruhcube.reset();
+		}
+		frameNum++;
 
-		Renderer::Transformation modelTransform;
+		Actor::Transformation modelTransform;
 		modelTransform.location = glm::vec3(sin(*engine.time) * 2.0f, 5.0f, cos(*engine.time) * 2.0f);
 		modelTransform.rotation = glm::quat(sin(*engine.time), 0.0f, cos(*engine.time), 0.0f);
-		testModel.setTransformation(modelTransform);
+		testModel->transform(modelTransform);
 
-		Renderer::Transformation model2Transform;
+		Actor::Transformation model2Transform;
 		model2Transform.location = glm::vec3(-sin(*engine.time) * 2.0f, 5.0f, -cos(*engine.time) * 2.0f);
 		model2Transform.rotation = glm::quat(sin(*engine.time * 0.2f), 0.0f, cos(*engine.time * 0.2f), 0.0f);
-		testModel2.setTransformation(model2Transform);
+		testModel2->transform(model2Transform);
 
-		icosphere.render(engine.getRenderer()->getCamera());
-		landscape.render(engine.getRenderer()->getCamera());
-		
-		testModel.render(engine.getRenderer()->getCamera());
-		testModel2.render(engine.getRenderer()->getCamera());
-		bruhcube.render(engine.getRenderer()->getCamera());
-
-		engine.getShaderByType(MaterialType::PBR)->unbind();
+		engine.preRender();
+		engine.renderEvent();
 		engine.postRender();
-		//maybe some game specifics idk
+		
 		exitLoop = engine.checkShouldClose();
 	}
 

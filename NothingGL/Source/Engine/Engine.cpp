@@ -53,7 +53,7 @@ void Engine::loadShaders(std::string shadersDir)
 				}
 				if (shaderFiles[0].find("vertex.glsl") != std::string::npos && shaderFiles[1].find("fragment.glsl") != std::string::npos)
 				{
-					this->shaders[MaterialType::PBR] = std::make_shared<Renderer::Shader>(shaderFiles[0].c_str(), shaderFiles[1].c_str(), renderer->getCamera());
+					this->shaders[ShaderType::PBR] = std::make_shared<Renderer::Shader>(shaderFiles[0].c_str(), shaderFiles[1].c_str(), renderer->getCamera());
 				}
 				else
 				{
@@ -119,7 +119,7 @@ void Engine::loadMaterials(std::string materialsDir)
 				size_t offset = entryPath.rfind(materialsDir) + materialsDir.size() + 1;
 				std::string matName = entryPath.substr(offset);
 				matName = matName.replace(matName.find("/"), sizeof("/") - 1, "_");
-				this->materials[matName] = std::make_shared<Renderer::Material>(MaterialType::PBR, entryPath, shaders[MaterialType::PBR].get());
+				this->materials[matName] = std::make_shared<Renderer::Material>(ShaderType::PBR, entryPath, shaders[ShaderType::PBR].get());
 			}
 		}
 	}
@@ -129,9 +129,52 @@ void Engine::loadMaterials(std::string materialsDir)
 	}
 }
 
+
+
+
+
+
+unsigned long Engine::addModelInstPtr(Renderer::ModelInstance* inst)
+{
+	modelInstPtrs.push_back(inst); return modelInstPtrs.size() - 1;
+}
+
+void Engine::removeModelInstPtr(unsigned long location)
+{
+	//this is a rather inneficient process, but it helps that quickly appearing
+	//objects will also be quickly deleted. Will change if it ever becomes a bottleneck
+	modelInstPtrs.erase(modelInstPtrs.begin() + location);
+}
+
+
+//---------RENDER EVENTS----------//
+
+
 void Engine::preRender()
 {
 	renderer->preDrawEvent();
+}
+
+void Engine::renderEvent()
+{
+	//render all modelInst with material type of PBR		TODO MAKE IT WHERE THIS ACTUALLY CHECKS THE MATERIAL TYPE
+	getShaderByType(ShaderType::PBR)->bind();
+
+	//start by updating the lights and camera
+	getShaderByType(ShaderType::PBR)->setCameraPosition(getRenderer()->getCamera()->getPosition());
+	getShaderByType(ShaderType::PBR)->updateLights(getPointLights(), getDirectLight(), getAmbientLight());
+
+	//maybe do some shadow mapping i havent implemented yet?
+
+	//render the models
+	for (const Renderer::ModelInstance* inst : modelInstPtrs)
+	{
+		if (inst != NULL)
+		{
+			inst->render(renderer->getCamera());
+		}
+	}
+	getShaderByType(ShaderType::PBR)->unbind();
 }
 
 void Engine::postRender()

@@ -11,6 +11,7 @@ namespace Renderer
 
 	Camera::Camera()
 	{
+		resolution = { 1, 1 };
 		cameraPitchYaw = { 180.0f, 0.0f };
 		position = glm::vec3(0.0f, 0.0f, 2.0f);
 		bForwards = false;
@@ -23,8 +24,9 @@ namespace Renderer
 	{
 	}
 
-	void Camera::setupCamera(float fov, int& width, int& height)
+	void Camera::setupCamera(float fov, unsigned int width, unsigned int height)
 	{
+		resolution = { width, height };
 		projection = glm::perspective(fov, (float)width / (float)height, 0.1f, 1000.0f);
 		updateView();
 	}

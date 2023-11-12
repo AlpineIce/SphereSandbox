@@ -7,6 +7,7 @@ namespace Renderer
 	class Camera
 	{
 	private:
+		glm::uvec2 resolution;
 		glm::vec3 position;
 		glm::vec3 target;
 		glm::vec3 direction;
@@ -22,7 +23,7 @@ namespace Renderer
 		Camera();
 		~Camera();
 
-		void setupCamera(float fov, int& width, int& height);
+		void setupCamera(float fov, unsigned int width, unsigned int height);
 		void update(const float& deltaTime);
 
 		void translate(glm::vec3 translation);

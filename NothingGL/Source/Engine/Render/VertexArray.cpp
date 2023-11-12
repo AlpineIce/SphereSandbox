@@ -63,12 +63,12 @@ namespace Renderer
 		ib.bind();
 	}
 
-	void VertexArray::bind()
+	void VertexArray::bind() const
 	{
 		glBindVertexArray(VAO);
 	}
 
-	void VertexArray::unbind()
+	void VertexArray::unbind() const
 	{
 		glBindVertexArray(0);
 	}

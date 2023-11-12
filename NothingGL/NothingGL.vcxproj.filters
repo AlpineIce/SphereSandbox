@@ -72,6 +72,9 @@
     <ClCompile Include="Source\Engine\Render\Light.cpp">
       <Filter>Source Files\Engine\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Actors\PhysicalActor.cpp">
+      <Filter>Source Files\Engine\Actor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -109,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Render\Light.h">
       <Filter>Source Files\Engine\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Actors\PhysicalActor.h">
+      <Filter>Source Files\Engine\Actor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

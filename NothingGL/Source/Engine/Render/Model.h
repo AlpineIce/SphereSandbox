@@ -11,12 +11,13 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "GLM/gtc/matrix_inverse.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "GLM/gtc/matrix_inverse.hpp"
 
 //	Mesh Mesh Mesh Mesh Mesh
 //	  |	   |   |    |    |
@@ -58,13 +59,13 @@ namespace Renderer
 		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int materialIndex);
 		~Mesh();
 
-		void draw(const Camera& camera, glm::mat4& instMatrix, Material* material);
+		void draw(const Camera& camera, const glm::mat4& instMatrix, const Material* material) const;
 
 		void setTransformation(Transformation transform);
 		void setMaterialIndex(unsigned int materialIndex);
 
-		glm::mat4 getModelMatrix();
-		inline unsigned int getMaterialIndex() { return materialIndex; }
+		glm::mat4 getModelMatrix() const;
+		inline unsigned int getMaterialIndex() const { return materialIndex; }
 	};
 
 	//wrapper for multiple Mesh classes (think of a model with multiple parts)
@@ -91,7 +92,7 @@ namespace Renderer
 		Model(std::string path);
 		~Model();
 
-		void draw(const Camera& camera, glm::mat4& instMatrix);
+		void draw(const Camera& camera, const glm::mat4& instMatrix) const;
 		void setTransformation(Transformation transform);
 
 		inline std::string getName() { return name; }
@@ -103,17 +104,17 @@ namespace Renderer
 	class ModelInstance
 	{
 	private:
-		Model* parentModel;
+		const Model* parentModel;
 		glm::mat4 modelMatrix;
 		Transformation transformation;
 		glm::mat4 getMatrix();
 
 	public:
-		ModelInstance(Model* model);
+		ModelInstance(const Model* model);
 		~ModelInstance();
 
 		void setTransformation(Transformation transform);
-		void render(const Camera* camera);
+		void render(const Camera* camera) const;
 	};
 
 }

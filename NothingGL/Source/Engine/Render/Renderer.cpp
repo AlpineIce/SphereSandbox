@@ -37,7 +37,7 @@ namespace Renderer
 	{
 		glfwGetWindowSize(window, &width, &height);
 		glViewport(0, 0, width, height);
-		camera.setupCamera(90.0f, width, height);
+		camera.setupCamera(90.0f, (unsigned int)width, (unsigned int)height);
 	}
 
 	void RenderEngine::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -131,8 +131,10 @@ namespace Renderer
 		camera.setupCamera(90.0f, width, height);
 
 		// During init, enable debug output
+#ifdef _DEBUG
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
+#endif
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glEnable(GL_CULL_FACE);
