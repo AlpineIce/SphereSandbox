@@ -36,9 +36,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Actors\Actor.h" />
+    <ClInclude Include="Source\Engine\Actors\Components\CollisionComponent.h" />
     <ClInclude Include="Source\Engine\Actors\Components\ModelComponent.h" />
     <ClInclude Include="Source\Engine\Actors\PhysicalActor.h" />
     <ClInclude Include="Source\Engine\Engine.h" />
+    <ClInclude Include="Source\Engine\Physics\Physics.h" />
     <ClInclude Include="Source\Engine\Render\Camera.h" />
     <ClInclude Include="Source\Engine\Render\Indexbuffer.h" />
     <ClInclude Include="Source\Engine\Render\Light.h" />

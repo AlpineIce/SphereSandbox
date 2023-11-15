@@ -1,11 +1,10 @@
 #include "ModelComponent.h"
-#include <iostream>
 
 namespace ActorComponent
 {
 
-	RenderComponent::RenderComponent(const Renderer::Model* parentModel, Engine* engine)
-		:object(parentModel), parentModelPtr(parentModel), enginePtr(engine)
+	RenderComponent::RenderComponent(const Renderer::Model* parentModel, Engine* engine, Renderer::Transformation transformation)
+		:object(parentModel), parentModelPtr(parentModel), enginePtr(engine), transformation(transformation)
 	{
 		ptrLocation = enginePtr->addModelInstPtr(&object);
 	}
@@ -19,5 +18,11 @@ namespace ActorComponent
 	{
 		this->transformation = transformation;
 		object.setTransformation(transformation);
+	}
+	void RenderComponent::replaceModel(const Renderer::Model* parentModel)
+	{
+		object = Renderer::ModelInstance(parentModel);
+		object.setTransformation(transformation);			//there is a potential problem here in that replacement doesnt initialize
+		enginePtr->changeModelInstPtr(&object, ptrLocation);//old values into the new object
 	}
 }

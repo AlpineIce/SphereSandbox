@@ -146,6 +146,11 @@ void Engine::removeModelInstPtr(unsigned long location)
 	modelInstPtrs.erase(modelInstPtrs.begin() + location);
 }
 
+void Engine::changeModelInstPtr(Renderer::ModelInstance* inst, unsigned long location)
+{
+	modelInstPtrs.at(location) = inst;
+}
+
 
 //---------RENDER EVENTS----------//
 

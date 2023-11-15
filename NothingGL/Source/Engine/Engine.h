@@ -43,7 +43,7 @@ public:
 	//yet if its a good idea to keep doing these same line function definitions
 
 	//shader and material getter functions
-	inline std::map<ShaderType, std::shared_ptr<Renderer::Shader>>*	getShaders() { return &shaders; }
+	inline std::map<ShaderType, std::shared_ptr<Renderer::Shader>>*		getShaders() { return &shaders; }
 	inline Renderer::Shader*											getShaderByType(ShaderType type) { return shaders.count(type) ? shaders[type].get() : NULL; }
 	inline std::map<std::string, std::shared_ptr<Renderer::Material>>*	getMaterials() { return &materials; }
 	inline Renderer::Material*											getMaterialFromName(std::string name) { return materials.count(name) ? materials[name].get() : NULL; }
@@ -66,6 +66,7 @@ public:
 	//functions for pushing back pointers for actor components, as well as returning their position in the vector
 	unsigned long addModelInstPtr(Renderer::ModelInstance* inst);
 	void removeModelInstPtr(unsigned long location);
+	void changeModelInstPtr(Renderer::ModelInstance* inst, unsigned long location);
 
 	void preRender();
 	void renderEvent();

@@ -116,5 +116,11 @@
     <ClInclude Include="Source\Engine\Actors\PhysicalActor.h">
       <Filter>Source Files\Engine\Actor</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\Actors\Components\CollisionComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Physics\Physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

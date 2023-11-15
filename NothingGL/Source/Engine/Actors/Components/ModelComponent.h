@@ -23,10 +23,11 @@ namespace ActorComponent
 		Engine* enginePtr;
 
 	public:
-		RenderComponent(const Renderer::Model* parentModel, Engine* engine);
+		RenderComponent(const Renderer::Model* parentModel, Engine* engine, Renderer::Transformation transformation);
 		~RenderComponent();
 
 		void transform(Renderer::Transformation transformation);
+		void replaceModel(const Renderer::Model* parentModel);
 	};
 
 }

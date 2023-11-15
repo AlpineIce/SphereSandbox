@@ -39,11 +39,11 @@ int main()
 	}
 
 	//creation of actors
-	std::unique_ptr<Actor::PhysicalActor> icosphere = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine);
-	std::unique_ptr<Actor::PhysicalActor> testModel = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine);
-	std::unique_ptr<Actor::PhysicalActor> testModel2 = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine);
-	std::unique_ptr<Actor::PhysicalActor> landscape = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine);
-	std::unique_ptr<Actor::PhysicalActor> bruhcube = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Cube"), &engine);
+	std::unique_ptr<Actor::PhysicalActor> icosphere = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, 0); //TODO PHYSICS TYPE
+	std::unique_ptr<Actor::PhysicalActor> testModel = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, 0);	//TODO PHYSICS TYPE
+	std::unique_ptr<Actor::PhysicalActor> testModel2 = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, 0);	//TODO PHYSICS TYPE
+	std::unique_ptr<Actor::PhysicalActor> landscape = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine, 0);	//TODO PHYSICS TYPE
+	std::unique_ptr<Actor::PhysicalActor> bruhcube = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Cube"), &engine, 0);		//TODO PHYSICS TYPE
 
 
 	Actor::Transformation cubeTransform;

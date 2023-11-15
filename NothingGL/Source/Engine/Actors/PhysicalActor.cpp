@@ -3,8 +3,10 @@
 namespace Actor
 {
 
-	PhysicalActor::PhysicalActor(const Renderer::Model* parentModel, Engine* engine)
-		:Actor(), renderObj(parentModel, engine)
+	PhysicalActor::PhysicalActor(const Renderer::Model* parentModel, Engine* engine, ActorComponent::ColliderType physicsType)
+		:Actor(), 
+		renderObj(parentModel, engine, { transformation.location, transformation.rotation, transformation.scale }),
+		collision(engine, physicsType)
 	{
 	}
 
