@@ -9,11 +9,8 @@ namespace Actor
 
 	class PhysicalActor : public Actor
 	{
-	private:
-		
-
 	public:
-		PhysicalActor(const Renderer::Model* parentModel, Engine* engine, ActorComponent::ColliderType physicsType);
+		PhysicalActor(const Renderer::Model* parentModel, Engine* engine, Physics::ColliderType physicsType, Physics::PhysicsShape colliderShape);
 		virtual ~PhysicalActor() override;
 
 		//Components

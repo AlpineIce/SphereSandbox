@@ -7,12 +7,15 @@
 Engine::Engine()
 {
 	renderer = std::make_unique<Renderer::RenderEngine>(1280, 720);
+	physicsEngine = std::make_unique<Physics::PhysicsEngine>();
 	time = renderer->getTimePointer();
 }
 
 Engine::~Engine()
 {
 }
+
+//---------LOAD FUNCTIONS----------//
 
 void Engine::loadShaders(std::string shadersDir)
 {
@@ -129,14 +132,12 @@ void Engine::loadMaterials(std::string materialsDir)
 	}
 }
 
-
-
-
-
+//---------OBJECT REFERENCE FUNCTIONS----------//
 
 unsigned long Engine::addModelInstPtr(Renderer::ModelInstance* inst)
 {
-	modelInstPtrs.push_back(inst); return modelInstPtrs.size() - 1;
+	modelInstPtrs.push_back(inst); 
+	return modelInstPtrs.size() - 1;
 }
 
 void Engine::removeModelInstPtr(unsigned long location)
@@ -151,6 +152,62 @@ void Engine::changeModelInstPtr(Renderer::ModelInstance* inst, unsigned long loc
 	modelInstPtrs.at(location) = inst;
 }
 
+unsigned long Engine::addCollisionPtr(Physics::ColliderType type, Physics::PhysicsObject* object)
+{
+	switch (type)
+	{
+	case Physics::ColliderType::DYNAMIC:
+		dynamicCollisionPtrs.push_back(object);
+		return dynamicCollisionPtrs.size() - 1;
+
+	case Physics::ColliderType::CONSTRAINT:
+		staticCollisionPtrs.push_back(object);
+		return staticCollisionPtrs.size() - 1;
+
+	case Physics::ColliderType::OVERLAP:
+		overlapCollisionPtrs.push_back(object);
+		return overlapCollisionPtrs.size() - 1;
+
+	}
+}
+
+void Engine::removeCollisionPtr(Physics::ColliderType type, unsigned long location)
+{
+	switch (type)
+	{
+	case Physics::ColliderType::DYNAMIC:
+		dynamicCollisionPtrs.erase(dynamicCollisionPtrs.begin() + location);
+		break;
+
+	case Physics::ColliderType::CONSTRAINT:
+		staticCollisionPtrs.erase(staticCollisionPtrs.begin() + location);
+		break;
+
+	case Physics::ColliderType::OVERLAP:
+		overlapCollisionPtrs.erase(overlapCollisionPtrs.begin() + location);
+		break;
+
+	}
+}
+
+void Engine::changeCollisionPtr(Physics::ColliderType type, Physics::PhysicsObject* object, unsigned long location)
+{
+	switch (type)
+	{
+	case Physics::ColliderType::DYNAMIC:
+		dynamicCollisionPtrs.at(location) = object;
+		break;
+
+	case Physics::ColliderType::CONSTRAINT:
+		staticCollisionPtrs.at(location) = object;
+		break;
+
+	case Physics::ColliderType::OVERLAP:
+		overlapCollisionPtrs.at(location) = object;
+		break;
+
+	}
+}
 
 //---------RENDER EVENTS----------//
 
@@ -176,7 +233,7 @@ void Engine::renderEvent()
 	{
 		if (inst != NULL)
 		{
-			inst->render(renderer->getCamera());
+			inst->render(*renderer->getCamera());
 		}
 	}
 	getShaderByType(ShaderType::PBR)->unbind();
@@ -190,5 +247,18 @@ void Engine::postRender()
 bool Engine::checkShouldClose()
 {
 	return renderer->checkWindowClose();
+}
+
+//---------PRE/POST LOOP EVENTS----------//
+
+void Engine::preLoop()
+{
+	physicsThread = std::thread(&Physics::PhysicsEngine::initLoop, physicsEngine.get(), &dynamicCollisionPtrs, &staticCollisionPtrs, &overlapCollisionPtrs);
+}
+
+void Engine::postLoop()
+{
+	physicsEngine->stopLoop();
+	physicsThread.join();
 }
 

@@ -8,38 +8,33 @@
 
 namespace ActorComponent
 {
-	enum ColliderType
-	{
-		CONSTRAINT = 0,
-		DYNAMIC = 1,
-		OVERLAP	= 2		//for overlap events, such as a hitbox
-	};
-
-	enum ColliderShape
-	{
-		Sphere = 0,
-		RectPrism,		//rectangular prism, or a cube if the lengths are similar
-		Cylinder,
-		Capsule,
-		Mesh			//ue style complex collision
-	};
 
 	class CollisionComponent
 	{
 	private:
-		ColliderType type;
-		ColliderShape shape;
-
+		Physics::PhysicsPrimitive basePrimitive;
+		Physics::PhysicsObject object;
 		Engine* enginePtr;
+		unsigned long ptrLocation;
+
+		Physics::ShapeArgs shapeArgs; //x, y, and z component
+
 
 	public:
-		CollisionComponent(Engine* engine, ColliderType type);
+		CollisionComponent(Engine* engine, Physics::ColliderType type, Physics::PhysicsShape shape);
 		~CollisionComponent();
 
-		inline ColliderType getType() { return type; }
-		inline void setType(ColliderType type) { this->type = type; }
+		void transform(Physics::Transformation transformation);
 
-		//im scared to learn how to implement this whole thing btw 
+		inline Physics::ColliderType getType() { return object.type; }
+		inline Physics::PhysicsObject* getObject() { return &object; }
+
+		inline void setType(Physics::ColliderType type) { object.type = type; }
+		inline void setShapeArgs(Physics::ShapeArgs shapeArgs) { this->shapeArgs = shapeArgs; }
+		inline void setComplexShape(std::vector<glm::vec3>* complexShape) { object.complexShape = complexShape; }
+		inline void setShape(Physics::PhysicsShape shape) { object.shape = shape; }
+		
+
 	};
 
 }

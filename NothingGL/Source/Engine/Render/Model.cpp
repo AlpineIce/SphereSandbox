@@ -207,8 +207,16 @@ namespace Renderer
 		return returnMesh;
 	}
 
-	void Model::draw(const Camera& camera, const glm::mat4& instMatrix) const
+	void Model::draw(const Camera& camera, Transformation offsetTrans) const
 	{
+		//offset transformation
+		glm::mat4 translate = glm::translate(glm::mat4(1.0f), offsetTrans.location);
+		glm::mat4 rotate = glm::mat4_cast(offsetTrans.rotation);
+		glm::mat4 scale = glm::scale(glm::mat4(1.0f), offsetTrans.scale);
+
+		glm::mat4 instMatrix = translate * rotate * scale;
+
+
 		unsigned int meshIndex = 0;
 		for (std::shared_ptr<Mesh> mesh : meshes)
 		{
@@ -225,42 +233,4 @@ namespace Renderer
 		}
 	}
 
-	//----------MODEL INSTANCE DEFINITIONS----------//
-
-	ModelInstance::ModelInstance(const Model* model)
-		:parentModel(model)
-	{
-		modelMatrix = getMatrix();
-	}
-
-	ModelInstance::~ModelInstance()
-	{
-	}
-
-	glm::mat4 ModelInstance::getMatrix()
-	{
-		glm::mat4 translate = glm::translate(glm::mat4(1.0f), this->transformation.location);
-		glm::mat4 rotate = glm::mat4_cast(this->transformation.rotation);
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), this->transformation.scale);
-
-		return translate * rotate * scale;
-	}
-
-	void ModelInstance::setTransformation(Transformation transform)
-	{
-		this->transformation = transform;
-		this->modelMatrix = getMatrix();
-	}
-
-	void ModelInstance::render(const Camera* camera) const
-	{
-		if (parentModel != NULL)
-		{
-			parentModel->draw(*camera, modelMatrix);
-		}
-		else
-		{
-			std::cout << "Warning: model instance parent model isn't valid" << "\n";
-		}
-	}
 }

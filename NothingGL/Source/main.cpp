@@ -39,11 +39,16 @@ int main()
 	}
 
 	//creation of actors
-	std::unique_ptr<Actor::PhysicalActor> icosphere = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, 0); //TODO PHYSICS TYPE
-	std::unique_ptr<Actor::PhysicalActor> testModel = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, 0);	//TODO PHYSICS TYPE
-	std::unique_ptr<Actor::PhysicalActor> testModel2 = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, 0);	//TODO PHYSICS TYPE
-	std::unique_ptr<Actor::PhysicalActor> landscape = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine, 0);	//TODO PHYSICS TYPE
-	std::unique_ptr<Actor::PhysicalActor> bruhcube = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Cube"), &engine, 0);		//TODO PHYSICS TYPE
+	std::unique_ptr<Actor::PhysicalActor> icosphere = 
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+	std::unique_ptr<Actor::PhysicalActor> testModel =
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+	std::unique_ptr<Actor::PhysicalActor> testModel2 =
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+	std::unique_ptr<Actor::PhysicalActor> landscape =
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+	std::unique_ptr<Actor::PhysicalActor> bruhcube =
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Cube"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);	
 
 
 	Actor::Transformation cubeTransform;
@@ -64,6 +69,9 @@ int main()
 	
 	engine.createAmbientLight();
 	engine.getAmbientLight()->setPower(1.5f);
+
+	
+	engine.preLoop(); //physics engine runs seperate from renderer loop below, has its own thread joining here
 
 	bool exitLoop = false;
 	unsigned long frameNum = 0;
@@ -92,6 +100,7 @@ int main()
 		
 		exitLoop = engine.checkShouldClose();
 	}
+	engine.postLoop();
 
 	return 0;
 }

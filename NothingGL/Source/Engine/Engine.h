@@ -2,9 +2,11 @@
 #include "Render/Renderer.h"
 #include "Render/Model.h"
 #include "Render/Material.h"
+#include "Physics/Physics.h"
 
 #include <map>
 #include <vector>
+#include <thread>
 
 typedef std::map<unsigned int, Renderer::Material*>* MaterialSlots;
 
@@ -24,10 +26,18 @@ private:
 	std::shared_ptr<DirectionalLight> directLight; //this could likely be used more than once in a vector
 	std::shared_ptr<AmbientLight> ambientLight;
 
-	//model instances from all actors with a render component
+	//actor component references
 	std::vector<Renderer::ModelInstance*> modelInstPtrs;
+	std::vector<Physics::PhysicsObject*> dynamicCollisionPtrs;
+	std::vector<Physics::PhysicsObject*> staticCollisionPtrs;
+	std::vector<Physics::PhysicsObject*> overlapCollisionPtrs;
 	
+	//render, physics, etc
 	std::unique_ptr<Renderer::RenderEngine> renderer; //renderer "object"
+	std::unique_ptr<Physics::PhysicsEngine> physicsEngine;
+
+	//threads
+	std::thread physicsThread;
 
 public:
 	Engine();
@@ -55,7 +65,9 @@ public:
 	inline std::vector<std::shared_ptr<PointLight>>*					getPointLights() { return &pointLights; }
 	inline std::shared_ptr<DirectionalLight>							getDirectLight() { return directLight; }
 	inline std::shared_ptr<AmbientLight>								getAmbientLight() { return ambientLight; }
-	inline Renderer::RenderEngine*										getRenderer() const { return renderer.get(); } //weirdly written because of unique ptr
+
+	inline Renderer::RenderEngine*										getRenderer() const { return renderer.get(); }
+	inline Physics::PhysicsEngine*										getPhysicsEngine() const { return physicsEngine.get(); }
 
 	//light creation functions
 	inline void createDirectionalLight()								{ directLight = std::make_shared<DirectionalLight>(); }
@@ -68,9 +80,18 @@ public:
 	void removeModelInstPtr(unsigned long location);
 	void changeModelInstPtr(Renderer::ModelInstance* inst, unsigned long location);
 
+	//same as above but for collision
+	unsigned long addCollisionPtr(Physics::ColliderType type, Physics::PhysicsObject* object);
+	void removeCollisionPtr(Physics::ColliderType type, unsigned long location);
+	void changeCollisionPtr(Physics::ColliderType type, Physics::PhysicsObject* object, unsigned long location);
+	
+	//events
 	void preRender();
 	void renderEvent();
 	void postRender();
 	bool checkShouldClose();
+
+	void preLoop();
+	void postLoop();
 
 };

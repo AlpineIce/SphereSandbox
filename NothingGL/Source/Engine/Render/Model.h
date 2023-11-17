@@ -92,7 +92,7 @@ namespace Renderer
 		Model(std::string path);
 		~Model();
 
-		void draw(const Camera& camera, const glm::mat4& instMatrix) const;
+		void draw(const Camera& camera, Transformation offsetTrans) const;
 		void setTransformation(Transformation transform);
 
 		inline std::string getName() { return name; }
@@ -100,21 +100,23 @@ namespace Renderer
 		inline std::map<unsigned int, Material*>* getMaterialSlots() { return &materialSlots; }
 	};
 
-	//class to draw instanced models
-	class ModelInstance
+	//struct for a model instance
+	struct ModelInstance
 	{
-	private:
 		const Model* parentModel;
-		glm::mat4 modelMatrix;
 		Transformation transformation;
-		glm::mat4 getMatrix();
 
-	public:
-		ModelInstance(const Model* model);
-		~ModelInstance();
+		ModelInstance(const Model* parentModel)
+			:parentModel(parentModel)
+		{
+		}
 
-		void setTransformation(Transformation transform);
-		void render(const Camera* camera) const;
+		void render(const Camera& camera) const
+		{
+			if (parentModel != NULL)
+			{
+				parentModel->draw(camera, transformation);
+			}
+		}
 	};
-
 }

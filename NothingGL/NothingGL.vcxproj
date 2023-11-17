@@ -20,9 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Actors\Actor.cpp" />
+    <ClCompile Include="Source\Engine\Actors\Components\CollisionComponent.cpp" />
     <ClCompile Include="Source\Engine\Actors\Components\ModelComponent.cpp" />
     <ClCompile Include="Source\Engine\Actors\PhysicalActor.cpp" />
     <ClCompile Include="Source\Engine\Engine.cpp" />
+    <ClCompile Include="Source\Engine\Physics\Physics.cpp" />
     <ClCompile Include="Source\Engine\Render\Camera.cpp" />
     <ClCompile Include="Source\Engine\Render\Indexbuffer.cpp" />
     <ClCompile Include="Source\Engine\Render\Light.cpp" />
@@ -41,6 +43,7 @@
     <ClInclude Include="Source\Engine\Actors\PhysicalActor.h" />
     <ClInclude Include="Source\Engine\Engine.h" />
     <ClInclude Include="Source\Engine\Physics\Physics.h" />
+    <ClInclude Include="Source\Engine\Physics\Shapes.h" />
     <ClInclude Include="Source\Engine\Render\Camera.h" />
     <ClInclude Include="Source\Engine\Render\Indexbuffer.h" />
     <ClInclude Include="Source\Engine\Render\Light.h" />

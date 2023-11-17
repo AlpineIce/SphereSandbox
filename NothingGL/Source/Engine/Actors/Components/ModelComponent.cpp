@@ -17,12 +17,12 @@ namespace ActorComponent
 	void RenderComponent::transform(Renderer::Transformation transformation)
 	{
 		this->transformation = transformation;
-		object.setTransformation(transformation);
+		object.transformation = transformation;
 	}
 	void RenderComponent::replaceModel(const Renderer::Model* parentModel)
 	{
 		object = Renderer::ModelInstance(parentModel);
-		object.setTransformation(transformation);			//there is a potential problem here in that replacement doesnt initialize
-		enginePtr->changeModelInstPtr(&object, ptrLocation);//old values into the new object
+		object.transformation = transformation;
+		enginePtr->changeModelInstPtr(&object, ptrLocation);
 	}
 }
