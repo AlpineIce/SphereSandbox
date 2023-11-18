@@ -38,6 +38,7 @@ private:
 
 	//threads
 	std::thread physicsThread;
+	std::mutex physicsLock;
 
 public:
 	Engine();

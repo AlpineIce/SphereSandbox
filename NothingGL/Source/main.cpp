@@ -42,21 +42,21 @@ int main()
 	std::unique_ptr<Actor::PhysicalActor> icosphere = 
 		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> testModel =
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::STATIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> testModel2 =
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::STATIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> landscape =
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine, Physics::ColliderType::STATIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> bruhcube =
 		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Cube"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);	
 
 
 	Actor::Transformation cubeTransform;
-	cubeTransform.location = { 5.0f, 3.0f, 0.0f };
+	cubeTransform.location = { 2.0f, 7.0f, 0.0f };
 	bruhcube->transform(cubeTransform);
 
 	Actor::Transformation sphereTransform;
-	sphereTransform.location = { -5.0f, 3.0f, 0.0f };
+	sphereTransform.location = { -2.0f, 7.0f, 0.0f };
 	icosphere->transform(sphereTransform);
 
 	//create some lights //TODO TURN THESE INTO ACTORS ALSO
@@ -77,20 +77,27 @@ int main()
 	unsigned long frameNum = 0;
 	while (!exitLoop)
 	{
+		//update actors physics
+		icosphere->transformPhysics();
+		//testModel->transformPhysics();
+		//testModel2->transformPhysics();
+		//landscape->transformPhysics();
+		bruhcube->transformPhysics();
+
 		//debug if statement 
 		if (frameNum == 1000)
 		{
-			bruhcube.reset();
+			//bruhcube.reset();
 		}
 		frameNum++;
 
 		Actor::Transformation modelTransform;
-		modelTransform.location = glm::vec3(sin(*engine.time) * 2.0f, 5.0f, cos(*engine.time) * 2.0f);
+		modelTransform.location = glm::vec3(sin(*engine.time) * 3.0f, 4.0f, cos(*engine.time) * 3.0f);
 		modelTransform.rotation = glm::quat(sin(*engine.time), 0.0f, cos(*engine.time), 0.0f);
 		testModel->transform(modelTransform);
 
 		Actor::Transformation model2Transform;
-		model2Transform.location = glm::vec3(-sin(*engine.time) * 2.0f, 5.0f, -cos(*engine.time) * 2.0f);
+		model2Transform.location = glm::vec3(-sin(*engine.time) * 3.0f, 4.0f, -cos(*engine.time) * 3.0f);
 		model2Transform.rotation = glm::quat(sin(*engine.time * 0.2f), 0.0f, cos(*engine.time * 0.2f), 0.0f);
 		testModel2->transform(model2Transform);
 

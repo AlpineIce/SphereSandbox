@@ -3,12 +3,12 @@
 namespace ActorComponent
 {
 
-	CollisionComponent::CollisionComponent(Engine* engine, Physics::ColliderType type, Physics::PhysicsShape shape)
-		:enginePtr(engine), shapeArgs({ glm::vec3(1.0, 1.0, 1.0) })
+	CollisionComponent::CollisionComponent(Engine* engine, Physics::ColliderType type, Physics::PhysicsShape shape, Physics::Transformation transformation)
+		:enginePtr(engine)
 	{
+		object.transformation = transformation;
 		object.shape = shape;
 		object.type = type;
-		object.shapeArgs = &shapeArgs;
 		setShape(shape);
 
 		ptrLocation = enginePtr->addCollisionPtr(type, &object);

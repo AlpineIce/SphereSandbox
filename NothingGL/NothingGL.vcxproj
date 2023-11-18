@@ -43,7 +43,6 @@
     <ClInclude Include="Source\Engine\Actors\PhysicalActor.h" />
     <ClInclude Include="Source\Engine\Engine.h" />
     <ClInclude Include="Source\Engine\Physics\Physics.h" />
-    <ClInclude Include="Source\Engine\Physics\Shapes.h" />
     <ClInclude Include="Source\Engine\Render\Camera.h" />
     <ClInclude Include="Source\Engine\Render\Indexbuffer.h" />
     <ClInclude Include="Source\Engine\Render\Light.h" />

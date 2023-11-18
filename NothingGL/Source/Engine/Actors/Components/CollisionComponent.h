@@ -12,16 +12,13 @@ namespace ActorComponent
 	class CollisionComponent
 	{
 	private:
-		Physics::PhysicsPrimitive basePrimitive;
 		Physics::PhysicsObject object;
 		Engine* enginePtr;
 		unsigned long ptrLocation;
 
-		Physics::ShapeArgs shapeArgs; //x, y, and z component
-
 
 	public:
-		CollisionComponent(Engine* engine, Physics::ColliderType type, Physics::PhysicsShape shape);
+		CollisionComponent(Engine* engine, Physics::ColliderType type, Physics::PhysicsShape shape, Physics::Transformation transformation);
 		~CollisionComponent();
 
 		void transform(Physics::Transformation transformation);
@@ -30,7 +27,6 @@ namespace ActorComponent
 		inline Physics::PhysicsObject* getObject() { return &object; }
 
 		inline void setType(Physics::ColliderType type) { object.type = type; }
-		inline void setShapeArgs(Physics::ShapeArgs shapeArgs) { this->shapeArgs = shapeArgs; }
 		inline void setComplexShape(std::vector<glm::vec3>* complexShape) { object.complexShape = complexShape; }
 		inline void setShape(Physics::PhysicsShape shape) { object.shape = shape; }
 		

@@ -7,7 +7,7 @@
 Engine::Engine()
 {
 	renderer = std::make_unique<Renderer::RenderEngine>(1280, 720);
-	physicsEngine = std::make_unique<Physics::PhysicsEngine>();
+	physicsEngine = std::make_unique<Physics::PhysicsEngine>(&physicsLock);
 	time = renderer->getTimePointer();
 }
 
@@ -160,7 +160,7 @@ unsigned long Engine::addCollisionPtr(Physics::ColliderType type, Physics::Physi
 		dynamicCollisionPtrs.push_back(object);
 		return dynamicCollisionPtrs.size() - 1;
 
-	case Physics::ColliderType::CONSTRAINT:
+	case Physics::ColliderType::STATIC:
 		staticCollisionPtrs.push_back(object);
 		return staticCollisionPtrs.size() - 1;
 
@@ -179,7 +179,7 @@ void Engine::removeCollisionPtr(Physics::ColliderType type, unsigned long locati
 		dynamicCollisionPtrs.erase(dynamicCollisionPtrs.begin() + location);
 		break;
 
-	case Physics::ColliderType::CONSTRAINT:
+	case Physics::ColliderType::STATIC:
 		staticCollisionPtrs.erase(staticCollisionPtrs.begin() + location);
 		break;
 
@@ -198,7 +198,7 @@ void Engine::changeCollisionPtr(Physics::ColliderType type, Physics::PhysicsObje
 		dynamicCollisionPtrs.at(location) = object;
 		break;
 
-	case Physics::ColliderType::CONSTRAINT:
+	case Physics::ColliderType::STATIC:
 		staticCollisionPtrs.at(location) = object;
 		break;
 

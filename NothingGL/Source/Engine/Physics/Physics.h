@@ -1,5 +1,9 @@
 #pragma once
-#include "Shapes.h"
+#include "GLM/glm.hpp"
+#include "GLM/gtc/quaternion.hpp"
+
+#include <vector>
+#include <mutex>
 
 namespace Physics
 {
@@ -11,9 +15,17 @@ namespace Physics
 		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
 	};
 
+	struct EnergyConservation
+	{
+		glm::dvec3 velocity = glm::dvec3(0.0f);
+		glm::vec3 rotationalVelocity = glm::vec3(1.0f, 7.0f, 0.0f);
+		glm::dvec3 acceleration = glm::dvec3(0.0f);
+		float mass = 1.0f;
+	};
+
 	enum ColliderType
 	{
-		CONSTRAINT = 0,
+		STATIC = 0,
 		DYNAMIC = 1,
 		OVERLAP = 2		//for overlap events, such as a hitbox
 	};
@@ -28,43 +40,42 @@ namespace Physics
 		MESH = 5			//ue style complex collision
 	};
 
-	struct ShapeArgs //optional variables dependent on shape
-	{
-		glm::vec3 size;
-	};
-
 	struct PhysicsObject
 	{
-		ColliderType type;
-		Transformation transformation;
-		glm::vec3 velocity;
-		float mass;
+		ColliderType type = STATIC;
+		PhysicsShape shape = SPHERE;
 
-		ShapeArgs* shapeArgs;
-		PhysicsShape shape;
+		Transformation transformation;
+		EnergyConservation energy;
+
 		std::vector<glm::vec3>* complexShape;
 	};
 
 	class PhysicsEngine		//i currently have no idea what to put here btw
 	{
 	private:
-		const float GRAVITY = 9.81f;
+		const double GRAVITY = 0.0;
 		bool looping;
-		void calcSphere(PhysicsObject* object);
-	public:
-		PhysicsEngine();
-		~PhysicsEngine();
+		std::mutex* threadLock;
 
-		void calculatePhysics(std::vector<PhysicsObject*>* dynamics,
-							  std::vector<PhysicsObject*>* constraints,
-							  std::vector<PhysicsObject*>* overlaps,
-							  double deltaTime);
+		void calculatePhysics(std::vector<PhysicsObject*>* dynamics, //function uses solvers below
+			std::vector<PhysicsObject*>* constraints,
+			std::vector<PhysicsObject*>* overlaps,
+			double deltaTime);
+		void solveAccel(PhysicsObject* object, double deltaTime);
+		void solveRotation(PhysicsObject* object, double deltaTime);
+		void solveDynamicStatic(PhysicsObject* dynamicObj, PhysicsObject* staticObj, double deltaTime);
+		void solveDynamicDynamic(PhysicsObject* dynamicObj1, PhysicsObject* dynamicObj2, double deltaTime);
+		
+	public:
+		PhysicsEngine(std::mutex* threadLock);
+		~PhysicsEngine();
 
 		void initLoop(std::vector<PhysicsObject*>* dynamics,
 					  std::vector<PhysicsObject*>* constraints,
 					  std::vector<PhysicsObject*>* overlaps);
 
-		void stopLoop() { looping = false; }
+		inline void stopLoop() { looping = false; }
 	};
 
 }
