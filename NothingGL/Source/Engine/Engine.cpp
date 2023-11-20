@@ -6,7 +6,7 @@
 
 Engine::Engine()
 {
-	renderer = std::make_unique<Renderer::RenderEngine>(1280, 720);
+	renderer = std::make_unique<Renderer::RenderEngine>(640, 480);
 	physicsEngine = std::make_unique<Physics::PhysicsEngine>(&physicsLock);
 	time = renderer->getTimePointer();
 }

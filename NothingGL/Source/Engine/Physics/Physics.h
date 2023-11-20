@@ -10,16 +10,16 @@ namespace Physics
 
 	struct Transformation
 	{
-		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
-		glm::quat rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
-		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+		glm::dvec3 location = glm::dvec3(0.0);
+		glm::dquat rotation = { 1.0, 0.0, 0.0, 0.0 };
+		glm::dvec3 scale = glm::dvec3(0.5);
 	};
 
 	struct EnergyConservation
 	{
-		glm::dvec3 velocity = glm::dvec3(0.0f);
+		glm::dvec3 velocity = glm::dvec3(0.0);
 		glm::vec3 rotationalVelocity = glm::vec3(1.0f, 7.0f, 0.0f);
-		glm::dvec3 acceleration = glm::dvec3(0.0f);
+		glm::dvec3 acceleration = glm::dvec3(0.0);
 		float mass = 1.0f;
 	};
 
@@ -44,6 +44,7 @@ namespace Physics
 	{
 		ColliderType type = STATIC;
 		PhysicsShape shape = SPHERE;
+		bool isOverlapping = false;
 
 		Transformation transformation;
 		EnergyConservation energy;
@@ -54,7 +55,7 @@ namespace Physics
 	class PhysicsEngine		//i currently have no idea what to put here btw
 	{
 	private:
-		const double GRAVITY = 0.0;
+		const double GRAVITY = -0.0;
 		bool looping;
 		std::mutex* threadLock;
 
@@ -62,10 +63,13 @@ namespace Physics
 			std::vector<PhysicsObject*>* constraints,
 			std::vector<PhysicsObject*>* overlaps,
 			double deltaTime);
+
 		void solveAccel(PhysicsObject* object, double deltaTime);
 		void solveRotation(PhysicsObject* object, double deltaTime);
 		void solveDynamicStatic(PhysicsObject* dynamicObj, PhysicsObject* staticObj, double deltaTime);
 		void solveDynamicDynamic(PhysicsObject* dynamicObj1, PhysicsObject* dynamicObj2, double deltaTime);
+
+		float findIntrusion(PhysicsObject* obj1, PhysicsObject* obj2);
 		
 	public:
 		PhysicsEngine(std::mutex* threadLock);

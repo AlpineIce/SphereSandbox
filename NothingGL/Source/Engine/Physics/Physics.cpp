@@ -30,7 +30,7 @@ namespace Physics
 		double deltaTime = 0.0f;
 		while (looping)
 		{
-			if (deltaTime < 0.0001) //make sure physics isnt running so fast that it outdoes double precision, minimum time of 0.1ms
+			if (deltaTime < 0.001) //make sure physics isnt running so fast that it outdoes double precision, minimum time of 0.1ms
 			{
 				std::chrono::milliseconds waitTime(1);
 				std::this_thread::sleep_for(waitTime);
@@ -53,13 +53,13 @@ namespace Physics
 		//calculate acceleration and angular velocity for all dynamic objects
 		for (PhysicsObject* object : *dynamics)
 		{
-			threadLock->lock();
+			
 			solveAccel(object, deltaTime);
 			solveRotation(object, deltaTime);
-			threadLock->unlock();
+			
 		}
 
-		//dynamics on static							//TODO RESEARCH AN ALGORITHM THAT ISNT O(N^2) (i am not proud of this code at all)
+		//dynamics on static							//TODO RESEARCH AN ALGORITHM THAT ISNT O(N^2) (i am not proud of this code at all) sweep and prune?
 		for (PhysicsObject* dynamic : *dynamics)
 		{
 			for (PhysicsObject* constraint : *constraints)
@@ -69,11 +69,12 @@ namespace Physics
 		}
 
 		//dynamics on dynamics
-		for (PhysicsObject* dynamicA : *dynamics)		//NESTED FOR LOOP MAKE CPU GO BRRRRRRRR
+		for (unsigned long i = 0; i < dynamics->size(); i++) //i hope this works idk
 		{
-			for (PhysicsObject* dynamicB : *dynamics)
+			for (unsigned long j = i + 1; j < dynamics->size(); j++)
 			{
-				solveDynamicDynamic(dynamicA, dynamicB, deltaTime);
+				std::cout << dynamics->at(i)->energy.velocity.x << "   " << dynamics->at(i)->energy.velocity.y << "   " << dynamics->at(i)->energy.velocity.z << std::endl;
+				solveDynamicDynamic(dynamics->at(i), dynamics->at(j), deltaTime);
 			}
 		}
 
@@ -86,46 +87,97 @@ namespace Physics
 	{
 		if (object)
 		{
+			threadLock->lock();
 			object->energy.velocity += (object->energy.acceleration + glm::dvec3(0.0, GRAVITY, 0.0)) * deltaTime * 0.5;
 			object->transformation.location += object->energy.velocity * deltaTime;
 			object->energy.velocity += (object->energy.acceleration + glm::dvec3(0.0, GRAVITY, 0.0)) * deltaTime * 0.5;
+			
+			//attract all objects towards center for debug test
+			if (glm::length(object->transformation.location) > 0.0f)
+			{
+				glm::dvec3 towardCenter = glm::normalize(-object->transformation.location);
+				object->energy.velocity += (object->energy.acceleration + (towardCenter * 0.5)) * deltaTime * 0.5;
+				object->transformation.location += object->energy.velocity * deltaTime;
+				object->energy.velocity += (object->energy.acceleration + (towardCenter * 0.5)) * deltaTime * 0.5;
+			}
+			threadLock->unlock();
+
 		}
 	}
 
 	void PhysicsEngine::solveRotation(PhysicsObject* object, double deltaTime)
 	{
-		object->transformation.rotation += (float)(deltaTime / 2.0) * glm::quat(0.0f, object->energy.rotationalVelocity) * object->transformation.rotation;
+		threadLock->lock();
+		object->transformation.rotation += (deltaTime / 2.0) * glm::dquat(0.0, object->energy.rotationalVelocity) * object->transformation.rotation;
 		object->transformation.rotation = glm::normalize(object->transformation.rotation);
+		threadLock->unlock();
 	}
 
 	void PhysicsEngine::solveDynamicStatic(PhysicsObject* dynamic, PhysicsObject* constraint, double deltaTime)
 	{
+		float intrusion = findIntrusion(dynamic, constraint);
+
+		if (intrusion < 0.0) //physics range
+		{
+
+		}
+
+	}
+
+	void PhysicsEngine::solveDynamicDynamic(PhysicsObject* dynamicObj1, PhysicsObject* dynamicObj2, double deltaTime)
+	{
 		threadLock->lock();
+		if (dynamicObj1 == dynamicObj2) //i just didnt want to add another nested block to the function that calls this btw
+		{
+			threadLock->unlock();
+			return;
+		}
 
 		//check if objects can potentially hit each other first
-		glm::vec3 distVector = dynamic->transformation.location - constraint->transformation.location;
-		glm::vec3 dS = dynamic->transformation.scale;		//dynamic scale
-		glm::vec3 cS = constraint->transformation.scale;	//constraint scale
-		float distOffset = glm::max(glm::max(dS.x, dS.y), dS.z) + glm::max(glm::max(cS.x, cS.y), cS.z);
+		glm::dvec3 distVector = dynamicObj1->transformation.location - dynamicObj2->transformation.location;
+		glm::vec3 do1 = dynamicObj1->transformation.scale;		//dynamic obj 1 scale
+		glm::vec3 do2 = dynamicObj2->transformation.scale;	//dynamic obj 2 scale
 
-		//some other stuff
-		PhysicsShape dynamicShape = dynamic->shape;
-		PhysicsShape constraintShape = constraint->shape;
-		threadLock->unlock();
+		float distOffset = glm::max(glm::max(do1.x, do1.y), do1.z) + glm::max(glm::max(do2.x, do2.y), do2.z);
+		float length = glm::length(distVector);
 		
-		float intrusion = glm::length(distVector) - distOffset;
-		if (intrusion < 0.0) //objects in physics range
+		if (length - distOffset < 0.0 && !dynamicObj1->isOverlapping && !dynamicObj2->isOverlapping) //objects in physics range
 		{
-			threadLock->lock();
-			EnergyConservation newEnergy;
-			//newEnergy.acceleration = dynamic->energy.acceleration;
-			newEnergy = dynamic->energy;
-
-			switch (dynamicShape)
+			dynamicObj1->isOverlapping = true;
+			dynamicObj2->isOverlapping = true;
+			switch (dynamicObj1->shape)
 			{
 			case PhysicsShape::SPHERE:
-				if (constraintShape == PhysicsShape::SPHERE)
+				if (dynamicObj2->shape == PhysicsShape::SPHERE)
 				{
+					//object 1
+					EnergyConservation energy1 = dynamicObj1->energy;
+					EnergyConservation energy2 = dynamicObj2->energy;
+
+					float massOfset = 2.0f * energy1.mass / (energy1.mass + energy2.mass);
+					double numerator = glm::dot(energy1.velocity - energy2.velocity, distVector);
+					float denominator = length * length;
+
+					glm::dvec3 newOffset = (massOfset * (numerator / denominator) * distVector);
+					dynamicObj1->energy.velocity = dynamicObj1->energy.velocity - newOffset;
+					
+
+					//object 2 (shadow previous variables i guess)
+					massOfset = 2.0f * energy2.mass / (energy1.mass + energy2.mass);
+					numerator = glm::dot(energy2.velocity - energy1.velocity, -distVector);
+					denominator = length * length;
+
+					newOffset = (massOfset * (numerator / denominator) * -distVector);
+					dynamicObj2->energy.velocity = dynamicObj2->energy.velocity - newOffset;
+
+					
+					//glm::vec3 collisionNormal = glm::normalize(distVector); //find normal first
+
+
+				}
+				else
+				{
+					std::cout << "Warning: collision for sphere against other types not yet setup \n";
 				}
 
 				break;
@@ -151,24 +203,19 @@ namespace Physics
 				break;
 
 			}
-
-			//dynamic->energy = newEnergy;
-			threadLock->unlock();
 		}
-
-	}
-
-	void PhysicsEngine::solveDynamicDynamic(PhysicsObject* dynamicObj1, PhysicsObject* dynamicObj2, double deltaTime)
-	{
-		if (dynamicObj1 == dynamicObj2) //i just didnt want to add another nested block to the function that calls this btw
+		else if (length - distOffset > 0.0 && dynamicObj1->isOverlapping && dynamicObj2->isOverlapping) //reset overlapping flag
 		{
-			return;
+			dynamicObj1->isOverlapping = false;
+			dynamicObj2->isOverlapping = false;
 		}
-
-		//kys for making this
+		threadLock->unlock();
 	}
 
-	//TODO OVERLAP SOLVER
+	float PhysicsEngine::findIntrusion(PhysicsObject* obj1, PhysicsObject* obj2) //basically the closet "spherical" distance possible
+	{
+		return 0.0f;
+	}
 
 }
 

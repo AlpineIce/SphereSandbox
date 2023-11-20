@@ -46,17 +46,17 @@ int main()
 	std::unique_ptr<Actor::PhysicalActor> testModel2 =
 		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::STATIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> landscape =
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Landscape"), &engine, Physics::ColliderType::STATIC, Physics::PhysicsShape::SPHERE);
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> bruhcube =
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Cube"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);	
+		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);	
 
 
 	Actor::Transformation cubeTransform;
-	cubeTransform.location = { 2.0f, 7.0f, 0.0f };
+	cubeTransform.location = { 2.0f, 2.5f, 0.0f };
 	bruhcube->transform(cubeTransform);
 
 	Actor::Transformation sphereTransform;
-	sphereTransform.location = { -2.0f, 7.0f, 0.0f };
+	sphereTransform.location = { -2.0f, 2.5f, 0.0f };
 	icosphere->transform(sphereTransform);
 
 	//create some lights //TODO TURN THESE INTO ACTORS ALSO
@@ -81,7 +81,7 @@ int main()
 		icosphere->transformPhysics();
 		//testModel->transformPhysics();
 		//testModel2->transformPhysics();
-		//landscape->transformPhysics();
+		landscape->transformPhysics();
 		bruhcube->transformPhysics();
 
 		//debug if statement 
