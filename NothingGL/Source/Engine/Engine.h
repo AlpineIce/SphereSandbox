@@ -27,10 +27,11 @@ private:
 	std::shared_ptr<AmbientLight> ambientLight;
 
 	//actor component references
-	std::vector<Renderer::ModelInstance*> modelInstPtrs;
-	std::vector<Physics::PhysicsObject*> dynamicCollisionPtrs;
-	std::vector<Physics::PhysicsObject*> staticCollisionPtrs;
-	std::vector<Physics::PhysicsObject*> overlapCollisionPtrs;
+	std::map<unsigned long, Renderer::ModelInstance*> modelInstPtrs;
+
+	std::map<unsigned long, Physics::PhysicsObject*> dynamicCollisionPtrs;
+	std::map<unsigned long, Physics::PhysicsObject*> staticCollisionPtrs;
+	std::map<unsigned long, Physics::PhysicsObject*> overlapCollisionPtrs;
 	
 	//render, physics, etc
 	std::unique_ptr<Renderer::RenderEngine> renderer; //renderer "object"

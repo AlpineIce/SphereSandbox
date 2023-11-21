@@ -1,4 +1,5 @@
 #include "CollisionComponent.h"
+#include <iostream>
 
 namespace ActorComponent
 {
@@ -23,5 +24,4 @@ namespace ActorComponent
 	{
 		object.transformation = transformation;
 	}
-
 }

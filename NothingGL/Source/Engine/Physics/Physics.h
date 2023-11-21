@@ -2,6 +2,7 @@
 #include "GLM/glm.hpp"
 #include "GLM/gtc/quaternion.hpp"
 
+#include <map>
 #include <vector>
 #include <mutex>
 
@@ -34,7 +35,7 @@ namespace Physics
 	{
 		SPHERE = 0,
 		PLANE = 1,
-		RECTPRISM = 2,		//rectangular prism, or a cube if the lengths are similar
+		BOX = 2,		//rectangular prism, or a cube if the lengths are similar
 		CYLINDER = 3,
 		CAPSULE = 4,
 		MESH = 5			//ue style complex collision
@@ -44,7 +45,6 @@ namespace Physics
 	{
 		ColliderType type = STATIC;
 		PhysicsShape shape = SPHERE;
-		bool isOverlapping = false;
 
 		Transformation transformation;
 		EnergyConservation energy;
@@ -52,16 +52,17 @@ namespace Physics
 		std::vector<glm::vec3>* complexShape;
 	};
 
-	class PhysicsEngine		//i currently have no idea what to put here btw
+	class PhysicsEngine
 	{
 	private:
 		const double GRAVITY = -0.0;
 		bool looping;
 		std::mutex* threadLock;
 
-		void calculatePhysics(std::vector<PhysicsObject*>* dynamics, //function uses solvers below
-			std::vector<PhysicsObject*>* constraints,
-			std::vector<PhysicsObject*>* overlaps,
+		void calculatePhysics(
+			std::map<unsigned long, PhysicsObject*>* dynamics, //function uses solvers below
+			std::map<unsigned long, PhysicsObject*>* constraints,
+			std::map<unsigned long, PhysicsObject*>* overlaps,
 			double deltaTime);
 
 		void solveAccel(PhysicsObject* object, double deltaTime);
@@ -75,9 +76,9 @@ namespace Physics
 		PhysicsEngine(std::mutex* threadLock);
 		~PhysicsEngine();
 
-		void initLoop(std::vector<PhysicsObject*>* dynamics,
-					  std::vector<PhysicsObject*>* constraints,
-					  std::vector<PhysicsObject*>* overlaps);
+		void initLoop(std::map<unsigned long, PhysicsObject*>* dynamics,
+					  std::map<unsigned long, PhysicsObject*>* constraints,
+					  std::map<unsigned long, PhysicsObject*>* overlaps);
 
 		inline void stopLoop() { looping = false; }
 	};

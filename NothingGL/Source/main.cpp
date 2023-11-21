@@ -1,6 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <thread>
+#include <vector>
 
 #include "Actors/PhysicalActor.h"
 #include "Engine/Engine.h"
@@ -32,39 +33,38 @@ int main()
 		cube_m->at(0) = engine.getMaterialFromName("Sphere_m_Sphere");
 	}
 
-	MaterialSlots landscape_m = engine.getModelMaterialSlots("Landscape");
-	if (sphere_m)
+	//MaterialSlots landscape_m = engine.getModelMaterialSlots("Landscape");
+	//if (sphere_m)
+	//{
+	//	landscape_m->at(0) = engine.getMaterialFromName("Landscape_m_Grass");
+	//}
+
+	std::vector<std::unique_ptr<Actor::PhysicalActor>> spheres(50);
+	for (int i = 0; i < spheres.size(); i++)
 	{
-		landscape_m->at(0) = engine.getMaterialFromName("Landscape_m_Grass");
+		spheres.at(i) = std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
+		Actor::Transformation transform;
+		transform.location = glm::vec3(sin((float)i / 4.0f) * 50.0f, cos((float)i / 4.0f) * 50.0f, sin((float)i) * 10.0f);
+		spheres.at(i)->transform(transform);
+
 	}
 
-	//creation of actors
-	std::unique_ptr<Actor::PhysicalActor> icosphere = 
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> testModel =
 		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::STATIC, Physics::PhysicsShape::SPHERE);
 	std::unique_ptr<Actor::PhysicalActor> testModel2 =
 		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("SkullCup"), &engine, Physics::ColliderType::STATIC, Physics::PhysicsShape::SPHERE);
-	std::unique_ptr<Actor::PhysicalActor> landscape =
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
-	std::unique_ptr<Actor::PhysicalActor> bruhcube =
-		std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);	
+	//std::unique_ptr<Actor::PhysicalActor> landscape =
+		//std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE);
 
 
-	Actor::Transformation cubeTransform;
-	cubeTransform.location = { 2.0f, 2.5f, 0.0f };
-	bruhcube->transform(cubeTransform);
 
-	Actor::Transformation sphereTransform;
-	sphereTransform.location = { -2.0f, 2.5f, 0.0f };
-	icosphere->transform(sphereTransform);
 
 	//create some lights //TODO TURN THESE INTO ACTORS ALSO
 	engine.createDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f));
-	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 0.0f)));
-	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(10.0f, 10.0f, -10.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-	//engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 0.0f)));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(10.0f, 10.0f, -10.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+	engine.getPointLights()->push_back(std::make_shared<PointLight>(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 	engine.getDirectLight()->setRotation(0.0f, 45.0f);
 	
 	engine.createAmbientLight();
@@ -78,11 +78,23 @@ int main()
 	while (!exitLoop)
 	{
 		//update actors physics
-		icosphere->transformPhysics();
 		//testModel->transformPhysics();
 		//testModel2->transformPhysics();
-		landscape->transformPhysics();
-		bruhcube->transformPhysics();
+
+		for (int i = 0; i < spheres.size(); i++)
+		{
+			spheres.at(i)->transformPhysics();
+		}
+
+		if (*engine.getRenderer()->getClickEvent())
+		{
+			*engine.getRenderer()->getClickEvent() = false;
+			spheres.push_back(std::make_unique<Actor::PhysicalActor>(engine.getModelFromName("Icosphere"), &engine, Physics::ColliderType::DYNAMIC, Physics::PhysicsShape::SPHERE));
+			Actor::Transformation transform;
+			Renderer::Camera* camera = engine.getRenderer()->getCamera();
+			transform.location = camera->getPosition();
+			spheres.at(spheres.size() - 1).get()->transform(transform);
+		}
 
 		//debug if statement 
 		if (frameNum == 1000)

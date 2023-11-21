@@ -11,6 +11,7 @@ namespace Renderer
 	Camera RenderEngine::camera;
 	glm::dvec2 RenderEngine::lastCursor = { 0.0f, 0.0f };
 	double RenderEngine::time;
+	bool RenderEngine::mouseClickEvent = false;
 
 
 	RenderEngine::RenderEngine(int width, int height)
@@ -64,6 +65,14 @@ namespace Renderer
 			camera.bLeft = false;
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
 			camera.bRight = false;
+
+
+	}
+
+	void RenderEngine::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+			mouseClickEvent = true;
 	}
 
 	void RenderEngine::mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -120,6 +129,7 @@ namespace Renderer
 		glfwSetErrorCallback(glfwErrorCallback);
 		glfwSetFramebufferSizeCallback(window, rebuildFramebufferCallback);
 		glfwSetKeyCallback(window, keyCallback);
+		glfwSetMouseButtonCallback(window, mouse_button_callback);
 		glfwSetCursorPosCallback(window, mouse_callback);
 
 		//glew

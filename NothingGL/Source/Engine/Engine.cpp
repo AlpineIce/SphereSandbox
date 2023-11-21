@@ -6,7 +6,7 @@
 
 Engine::Engine()
 {
-	renderer = std::make_unique<Renderer::RenderEngine>(640, 480);
+	renderer = std::make_unique<Renderer::RenderEngine>(1600, 900);
 	physicsEngine = std::make_unique<Physics::PhysicsEngine>(&physicsLock);
 	time = renderer->getTimePointer();
 }
@@ -136,15 +136,13 @@ void Engine::loadMaterials(std::string materialsDir)
 
 unsigned long Engine::addModelInstPtr(Renderer::ModelInstance* inst)
 {
-	modelInstPtrs.push_back(inst); 
+	modelInstPtrs[modelInstPtrs.size()] = inst;
 	return modelInstPtrs.size() - 1;
 }
 
 void Engine::removeModelInstPtr(unsigned long location)
 {
-	//this is a rather inneficient process, but it helps that quickly appearing
-	//objects will also be quickly deleted. Will change if it ever becomes a bottleneck
-	modelInstPtrs.erase(modelInstPtrs.begin() + location);
+	modelInstPtrs.erase(location);
 }
 
 void Engine::changeModelInstPtr(Renderer::ModelInstance* inst, unsigned long location)
@@ -157,15 +155,15 @@ unsigned long Engine::addCollisionPtr(Physics::ColliderType type, Physics::Physi
 	switch (type)
 	{
 	case Physics::ColliderType::DYNAMIC:
-		dynamicCollisionPtrs.push_back(object);
+		dynamicCollisionPtrs[dynamicCollisionPtrs.size()] = object;
 		return dynamicCollisionPtrs.size() - 1;
 
 	case Physics::ColliderType::STATIC:
-		staticCollisionPtrs.push_back(object);
+		staticCollisionPtrs[staticCollisionPtrs.size()] = object;
 		return staticCollisionPtrs.size() - 1;
 
 	case Physics::ColliderType::OVERLAP:
-		overlapCollisionPtrs.push_back(object);
+		overlapCollisionPtrs[overlapCollisionPtrs.size()] = object;
 		return overlapCollisionPtrs.size() - 1;
 
 	}
@@ -176,15 +174,15 @@ void Engine::removeCollisionPtr(Physics::ColliderType type, unsigned long locati
 	switch (type)
 	{
 	case Physics::ColliderType::DYNAMIC:
-		dynamicCollisionPtrs.erase(dynamicCollisionPtrs.begin() + location);
+		dynamicCollisionPtrs.erase(location);
 		break;
 
 	case Physics::ColliderType::STATIC:
-		staticCollisionPtrs.erase(staticCollisionPtrs.begin() + location);
+		staticCollisionPtrs.erase(location);
 		break;
 
 	case Physics::ColliderType::OVERLAP:
-		overlapCollisionPtrs.erase(overlapCollisionPtrs.begin() + location);
+		overlapCollisionPtrs.erase(location);
 		break;
 
 	}
@@ -228,12 +226,12 @@ void Engine::renderEvent()
 
 	//maybe do some shadow mapping i havent implemented yet?
 
-	//render the models
-	for (const Renderer::ModelInstance* inst : modelInstPtrs)
+	//render the model
+	for (auto  const [key, val] : modelInstPtrs)
 	{
-		if (inst != NULL)
+		if (val != NULL)
 		{
-			inst->render(*renderer->getCamera());
+			val->render(*renderer->getCamera());
 		}
 	}
 	getShaderByType(ShaderType::PBR)->unbind();
@@ -260,5 +258,6 @@ void Engine::postLoop()
 {
 	physicsEngine->stopLoop();
 	physicsThread.join();
+	
 }
 

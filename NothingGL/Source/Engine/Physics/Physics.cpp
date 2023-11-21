@@ -20,9 +20,10 @@ namespace Physics
 
 	//----------LOOP AND "MAIN"----------//
 
-	void PhysicsEngine::initLoop(std::vector<PhysicsObject*>* dynamics,
-		std::vector<PhysicsObject*>* constraints,
-		std::vector<PhysicsObject*>* overlaps)
+	void PhysicsEngine::initLoop(
+		std::map<unsigned long, PhysicsObject*>* dynamics,
+		std::map<unsigned long, PhysicsObject*>* constraints,
+		std::map<unsigned long, PhysicsObject*>* overlaps)
 	{
 		if (!looping) { looping = true; } //for reinitiation of loop which may or may not happen
 
@@ -45,13 +46,14 @@ namespace Physics
 		}
 	}
 
-	void PhysicsEngine::calculatePhysics(std::vector<PhysicsObject*>* dynamics,
-		std::vector<PhysicsObject*>* constraints,
-		std::vector<PhysicsObject*>* overlaps,
+	void PhysicsEngine::calculatePhysics(
+		std::map<unsigned long, PhysicsObject*>* dynamics,
+		std::map<unsigned long, PhysicsObject*>* constraints,
+		std::map<unsigned long, PhysicsObject*>* overlaps,
 		double deltaTime)
 	{
 		//calculate acceleration and angular velocity for all dynamic objects
-		for (PhysicsObject* object : *dynamics)
+		for (auto const& [key, object] : *dynamics)
 		{
 			
 			solveAccel(object, deltaTime);
@@ -59,10 +61,10 @@ namespace Physics
 			
 		}
 
-		//dynamics on static							//TODO RESEARCH AN ALGORITHM THAT ISNT O(N^2) (i am not proud of this code at all) sweep and prune?
-		for (PhysicsObject* dynamic : *dynamics)
+		//dynamics on static							//TODO IMPLEMENT BOUNDING VOLUME HIERARCHIES 
+		for (auto const& [key, dynamic] : *dynamics)
 		{
-			for (PhysicsObject* constraint : *constraints)
+			for (auto const& [key, constraint] : *constraints)
 			{
 				solveDynamicStatic(dynamic, constraint, deltaTime);
 			}
@@ -73,7 +75,6 @@ namespace Physics
 		{
 			for (unsigned long j = i + 1; j < dynamics->size(); j++)
 			{
-				std::cout << dynamics->at(i)->energy.velocity.x << "   " << dynamics->at(i)->energy.velocity.y << "   " << dynamics->at(i)->energy.velocity.z << std::endl;
 				solveDynamicDynamic(dynamics->at(i), dynamics->at(j), deltaTime);
 			}
 		}
@@ -96,9 +97,9 @@ namespace Physics
 			if (glm::length(object->transformation.location) > 0.0f)
 			{
 				glm::dvec3 towardCenter = glm::normalize(-object->transformation.location);
-				object->energy.velocity += (object->energy.acceleration + (towardCenter * 0.5)) * deltaTime * 0.5;
+				object->energy.velocity += (object->energy.acceleration + (towardCenter * 4.0)) * deltaTime * 0.5;
 				object->transformation.location += object->energy.velocity * deltaTime;
-				object->energy.velocity += (object->energy.acceleration + (towardCenter * 0.5)) * deltaTime * 0.5;
+				object->energy.velocity += (object->energy.acceleration + (towardCenter * 4.0)) * deltaTime * 0.5;
 			}
 			threadLock->unlock();
 
@@ -141,19 +142,17 @@ namespace Physics
 		float distOffset = glm::max(glm::max(do1.x, do1.y), do1.z) + glm::max(glm::max(do2.x, do2.y), do2.z);
 		float length = glm::length(distVector);
 		
-		if (length - distOffset < 0.0 && !dynamicObj1->isOverlapping && !dynamicObj2->isOverlapping) //objects in physics range
+		if (length - distOffset < 0.0) //objects in physics range
 		{
-			dynamicObj1->isOverlapping = true;
-			dynamicObj2->isOverlapping = true;
 			switch (dynamicObj1->shape)
 			{
 			case PhysicsShape::SPHERE:
 				if (dynamicObj2->shape == PhysicsShape::SPHERE)
 				{
-					//object 1
 					EnergyConservation energy1 = dynamicObj1->energy;
 					EnergyConservation energy2 = dynamicObj2->energy;
 
+					//object 1
 					float massOfset = 2.0f * energy1.mass / (energy1.mass + energy2.mass);
 					double numerator = glm::dot(energy1.velocity - energy2.velocity, distVector);
 					float denominator = length * length;
@@ -161,7 +160,6 @@ namespace Physics
 					glm::dvec3 newOffset = (massOfset * (numerator / denominator) * distVector);
 					dynamicObj1->energy.velocity = dynamicObj1->energy.velocity - newOffset;
 					
-
 					//object 2 (shadow previous variables i guess)
 					massOfset = 2.0f * energy2.mass / (energy1.mass + energy2.mass);
 					numerator = glm::dot(energy2.velocity - energy1.velocity, -distVector);
@@ -170,9 +168,9 @@ namespace Physics
 					newOffset = (massOfset * (numerator / denominator) * -distVector);
 					dynamicObj2->energy.velocity = dynamicObj2->energy.velocity - newOffset;
 
-					
-					//glm::vec3 collisionNormal = glm::normalize(distVector); //find normal first
-
+					//move objects to outside so they dont just blob together
+					dynamicObj1->transformation.location -= (double)(length - distOffset) * glm::normalize(distVector) * 0.5;
+					dynamicObj2->transformation.location += (double)(length - distOffset) * glm::normalize(distVector) * 0.5;
 
 				}
 				else
@@ -186,7 +184,7 @@ namespace Physics
 
 				break;
 
-			case PhysicsShape::RECTPRISM:
+			case PhysicsShape::BOX:
 
 				break;
 
@@ -203,11 +201,6 @@ namespace Physics
 				break;
 
 			}
-		}
-		else if (length - distOffset > 0.0 && dynamicObj1->isOverlapping && dynamicObj2->isOverlapping) //reset overlapping flag
-		{
-			dynamicObj1->isOverlapping = false;
-			dynamicObj2->isOverlapping = false;
 		}
 		threadLock->unlock();
 	}
