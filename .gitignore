@@ -10,17 +10,15 @@
 *.userosscache
 *.sln.docstates
 
-# User-specific files (MonoDevelop/Xamarin Studio)
-*.userprefs
-build/Materials
-build/Models
-build/bin
-build/.cmake
+#cmake build
+build/
+
 
 
 #vscode
 .vs/
-lib/
+.vscode/
+.recipe
 
 #cmake
 out/

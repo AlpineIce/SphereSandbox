@@ -19,10 +19,9 @@ Engine::~Engine()
 
 void Engine::loadShaders(std::string shadersDir)
 {
-	std::string path = shadersDir;
 	try
 	{
-		std::filesystem::directory_iterator fileDirs(path);
+		std::filesystem::directory_iterator fileDirs(shadersDir);
 		for (const auto& entry : fileDirs)
 		{
 			std::string entryPath = entry.path().string();
@@ -69,16 +68,15 @@ void Engine::loadShaders(std::string shadersDir)
 	}
 	catch (std::filesystem::filesystem_error error)
 	{
-		std::cout << "Problem loading model files: " << error.what() << "\n";
+		throw std::runtime_error("Problem loading model files");
 	}
 }
 
 void Engine::loadModels(std::string modelsDir)
 {
-	std::string path = modelsDir;
 	try
 	{
-		std::filesystem::recursive_directory_iterator fileDirs(path);
+		std::filesystem::recursive_directory_iterator fileDirs(modelsDir);
 		for (const auto& entry : fileDirs)
 		{
 			std::string entryPath = entry.path().string();
@@ -106,10 +104,9 @@ void Engine::loadModels(std::string modelsDir)
 
 void Engine::loadMaterials(std::string materialsDir)
 {
-	std::string path = materialsDir;
 	try
 	{
-		std::filesystem::recursive_directory_iterator fileDirs(path);
+		std::filesystem::recursive_directory_iterator fileDirs(materialsDir);
 		for (const auto& entry : fileDirs)
 		{
 			std::string entryPath = entry.path().string();

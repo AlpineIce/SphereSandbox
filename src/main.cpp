@@ -19,6 +19,7 @@ int main()
 	MaterialSlots cup_m = engine.getModelMaterialSlots("SkullCup");
 	if (cup_m)
 	{
+		int size = cup_m->size();
 		cup_m->at(0) = engine.getMaterialFromName("SkulCup_m_Teeth");
 		cup_m->at(1) = engine.getMaterialFromName("SkulCup_m_Base");
 		cup_m->at(2) = engine.getMaterialFromName("SkulCup_m_Bone");
