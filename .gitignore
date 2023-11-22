@@ -11,8 +11,8 @@
 *.sln.docstates
 
 #cmake build
-build/
-
+build/.cmake
+build/lib/*
 
 
 #vscode
@@ -22,12 +22,17 @@ build/
 *.obj
 *.dll
 *.lib
+*.dir
 *.tlog
 *.pdb
+*.exe
 *.ilk
 *.sln
 *.vscode/
 *.recipe
+
+#library exlusions
+!lib/
 
 #cmake
 out/
