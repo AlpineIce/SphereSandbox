@@ -16,9 +16,18 @@ build/
 
 
 #vscode
-.vs/
-.vscode/
-.recipe
+*.vs/
+*.vcxproj
+*.vcxproj.filters
+*.obj
+*.dll
+*.lib
+*.tlog
+*.pdb
+*.ilk
+*.sln
+*.vscode/
+*.recipe
 
 #cmake
 out/
