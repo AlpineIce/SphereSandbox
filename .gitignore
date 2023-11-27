@@ -9,10 +9,13 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.jpg
+*.png
+*.fbx
 
 #cmake build
-build/.cmake
-build/lib/*
+/build
+
 
 
 #vscode
@@ -30,6 +33,7 @@ build/lib/*
 *.sln
 *.vscode/
 *.recipe
+*.ninja
 
 #library exlusions
 !lib/
