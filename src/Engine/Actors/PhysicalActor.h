@@ -19,7 +19,7 @@ namespace Actor
 
 		//functions
 		virtual void transform(Transformation transform) override;
-		virtual void transformPhysics();
+		virtual void updatePhysics();
 	};
 
 }

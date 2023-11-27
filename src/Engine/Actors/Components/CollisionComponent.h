@@ -27,7 +27,6 @@ namespace ActorComponent
 		inline Physics::PhysicsObject* getObject() { return &object; }
 
 		inline void setType(Physics::ColliderType type) { object.type = type; }
-		inline void setComplexShape(std::vector<glm::vec3>* complexShape) { object.complexShape = complexShape; }
 		inline void setShape(Physics::PhysicsShape shape) { object.shape = shape; }
 		
 

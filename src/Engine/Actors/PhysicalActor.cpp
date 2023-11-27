@@ -23,7 +23,7 @@ namespace Actor
 		collision.transform({ transformation.location, transformation.rotation, glm::vec3(1.0f) });
 	}
 
-	void PhysicalActor::transformPhysics()
+	void PhysicalActor::updatePhysics()
 	{
 		Physics::Transformation newTransform = collision.getObject()->transformation;
 

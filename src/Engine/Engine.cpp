@@ -157,52 +157,24 @@ unsigned long Engine::addCollisionPtr(Physics::ColliderType type, Physics::Physi
 		dynamicCollisionPtrs[(unsigned long)dynamicCollisionPtrs.size()] = object;
 		return (unsigned long)dynamicCollisionPtrs.size() - 1;
 
-	case Physics::ColliderType::STATIC:
-		staticCollisionPtrs[(unsigned long)staticCollisionPtrs.size()] = object;
-		return (unsigned long)staticCollisionPtrs.size() - 1;
-
-	case Physics::ColliderType::OVERLAP:
-		overlapCollisionPtrs[(unsigned long)overlapCollisionPtrs.size()] = object;
-		return (unsigned long)overlapCollisionPtrs.size() - 1;
-
 	}
+
+	return 0;
 }
 
 void Engine::removeCollisionPtr(Physics::ColliderType type, unsigned long location)
 {
-	switch (type)
+	if (type == Physics::ColliderType::DYNAMIC)
 	{
-	case Physics::ColliderType::DYNAMIC:
 		dynamicCollisionPtrs.erase(location);
-		break;
-
-	case Physics::ColliderType::STATIC:
-		staticCollisionPtrs.erase(location);
-		break;
-
-	case Physics::ColliderType::OVERLAP:
-		overlapCollisionPtrs.erase(location);
-		break;
-
 	}
 }
 
 void Engine::changeCollisionPtr(Physics::ColliderType type, Physics::PhysicsObject* object, unsigned long location)
 {
-	switch (type)
+	if (type == Physics::ColliderType::DYNAMIC)
 	{
-	case Physics::ColliderType::DYNAMIC:
 		dynamicCollisionPtrs.at(location) = object;
-		break;
-
-	case Physics::ColliderType::STATIC:
-		staticCollisionPtrs.at(location) = object;
-		break;
-
-	case Physics::ColliderType::OVERLAP:
-		overlapCollisionPtrs.at(location) = object;
-		break;
-
 	}
 }
 
@@ -250,7 +222,7 @@ bool Engine::checkShouldClose()
 
 void Engine::preLoop()
 {
-	physicsThread = std::thread(&Physics::PhysicsEngine::initLoop, physicsEngine.get(), &dynamicCollisionPtrs, &staticCollisionPtrs, &overlapCollisionPtrs);
+	physicsThread = std::thread(&Physics::PhysicsEngine::initLoop, physicsEngine.get(), &dynamicCollisionPtrs);
 }
 
 void Engine::postLoop()

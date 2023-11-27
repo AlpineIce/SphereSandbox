@@ -21,9 +21,7 @@ namespace Physics
 	//----------LOOP AND "MAIN"----------//
 
 	void PhysicsEngine::initLoop(
-		std::map<unsigned long, PhysicsObject*>* dynamics,
-		std::map<unsigned long, PhysicsObject*>* constraints,
-		std::map<unsigned long, PhysicsObject*>* overlaps)
+		std::map<unsigned long, PhysicsObject*>* dynamics)
 	{
 		if (!looping) { looping = true; } //for reinitiation of loop which may or may not happen
 
@@ -37,7 +35,7 @@ namespace Physics
 				std::this_thread::sleep_for(waitTime);
 			}
 
-			calculatePhysics(dynamics, constraints, overlaps, deltaTime);
+			calculatePhysics(dynamics, deltaTime);
 
 			//update deltaTime
 			double curTime = glfwGetTime(); //should be thread safe
@@ -47,10 +45,7 @@ namespace Physics
 	}
 
 	void PhysicsEngine::calculatePhysics(
-		std::map<unsigned long, PhysicsObject*>* dynamics,
-		std::map<unsigned long, PhysicsObject*>* constraints,
-		std::map<unsigned long, PhysicsObject*>* overlaps,
-		double deltaTime)
+		std::map<unsigned long, PhysicsObject*>* dynamics, double deltaTime)
 	{
 		//calculate acceleration and angular velocity for all dynamic objects
 		for (auto const& [key, object] : *dynamics)
@@ -61,49 +56,42 @@ namespace Physics
 			
 		}
 
-		//dynamics on static							//TODO IMPLEMENT BOUNDING VOLUME HIERARCHIES 
-		for (auto const& [key, dynamic] : *dynamics)
-		{
-			for (auto const& [key, constraint] : *constraints)
-			{
-				solveDynamicStatic(dynamic, constraint, deltaTime);
-			}
-		}
-
 		//dynamics on dynamics
-		for (unsigned long i = 0; i < dynamics->size(); i++) //i hope this works idk
+		for (unsigned long i = 0; i < dynamics->size(); i++) //TODO IMPLEMENT BOUNDING VOLUME HIERARCHIES 
 		{
 			for (unsigned long j = i + 1; j < dynamics->size(); j++)
 			{
 				solveDynamicDynamic(dynamics->at(i), dynamics->at(j), deltaTime);
 			}
 		}
-
-		//overlaps
 	}
 
 	//----------SOLVER FUNCTIONS----------//
 
 	void PhysicsEngine::solveAccel(PhysicsObject* object, double deltaTime)
 	{
+		threadLock->lock();
 		if (object)
 		{
-			threadLock->lock();
 			object->energy.velocity += (object->energy.acceleration + glm::dvec3(0.0, GRAVITY, 0.0)) * deltaTime * 0.5;
-			object->transformation.location += object->energy.velocity * deltaTime;
-			object->energy.velocity += (object->energy.acceleration + glm::dvec3(0.0, GRAVITY, 0.0)) * deltaTime * 0.5;
-			
-			//attract all objects towards center for debug test
 			if (glm::length(object->transformation.location) > 0.0f)
 			{
 				glm::dvec3 towardCenter = glm::normalize(-object->transformation.location);
 				object->energy.velocity += (object->energy.acceleration + (towardCenter * 4.0)) * deltaTime * 0.5;
-				object->transformation.location += object->energy.velocity * deltaTime;
 				object->energy.velocity += (object->energy.acceleration + (towardCenter * 4.0)) * deltaTime * 0.5;
 			}
-			threadLock->unlock();
 
+			object->transformation.location += object->energy.velocity * deltaTime;
+
+			object->energy.velocity += (object->energy.acceleration + glm::dvec3(0.0, GRAVITY, 0.0)) * deltaTime * 0.5;
+			if (glm::length(object->transformation.location) > 0.0f)
+			{
+				glm::dvec3 towardCenter = glm::normalize(-object->transformation.location);
+				object->energy.velocity += (object->energy.acceleration + (towardCenter * 4.0)) * deltaTime * 0.5;
+				object->energy.velocity += (object->energy.acceleration + (towardCenter * 4.0)) * deltaTime * 0.5;
+			}
 		}
+		threadLock->unlock();
 	}
 
 	void PhysicsEngine::solveRotation(PhysicsObject* object, double deltaTime)
@@ -112,17 +100,6 @@ namespace Physics
 		object->transformation.rotation += (deltaTime / 2.0) * glm::dquat(0.0, object->energy.rotationalVelocity) * object->transformation.rotation;
 		object->transformation.rotation = glm::normalize(object->transformation.rotation);
 		threadLock->unlock();
-	}
-
-	void PhysicsEngine::solveDynamicStatic(PhysicsObject* dynamic, PhysicsObject* constraint, double deltaTime)
-	{
-		float intrusion = findIntrusion(dynamic, constraint);
-
-		if (intrusion < 0.0) //physics range
-		{
-
-		}
-
 	}
 
 	void PhysicsEngine::solveDynamicDynamic(PhysicsObject* dynamicObj1, PhysicsObject* dynamicObj2, double deltaTime)
@@ -144,14 +121,13 @@ namespace Physics
 		
 		if (length - distOffset < 0.0) //objects in physics range
 		{
+			EnergyConservation energy1 = dynamicObj1->energy;
+			EnergyConservation energy2 = dynamicObj2->energy;
 			switch (dynamicObj1->shape)
 			{
 			case PhysicsShape::SPHERE:
 				if (dynamicObj2->shape == PhysicsShape::SPHERE)
 				{
-					EnergyConservation energy1 = dynamicObj1->energy;
-					EnergyConservation energy2 = dynamicObj2->energy;
-
 					//object 1
 					float massOfset = 2.0f * energy1.mass / (energy1.mass + energy2.mass);
 					double numerator = glm::dot(energy1.velocity - energy2.velocity, distVector);
@@ -171,43 +147,12 @@ namespace Physics
 					//move objects to outside so they dont just blob together
 					dynamicObj1->transformation.location -= (double)(length - distOffset) * glm::normalize(distVector) * 0.5;
 					dynamicObj2->transformation.location += (double)(length - distOffset) * glm::normalize(distVector) * 0.5;
-
-				}
-				else
-				{
-					std::cout << "Warning: collision for sphere against other types not yet setup \n";
 				}
 
 				break;
-
-			case PhysicsShape::PLANE:
-
-				break;
-
-			case PhysicsShape::BOX:
-
-				break;
-
-			case PhysicsShape::CYLINDER:
-
-				break;
-
-			case PhysicsShape::CAPSULE:
-
-				break;
-
-			case PhysicsShape::MESH:
-
-				break;
-
 			}
 		}
 		threadLock->unlock();
-	}
-
-	float PhysicsEngine::findIntrusion(PhysicsObject* obj1, PhysicsObject* obj2) //basically the closet "spherical" distance possible
-	{
-		return 0.0f;
 	}
 
 }
