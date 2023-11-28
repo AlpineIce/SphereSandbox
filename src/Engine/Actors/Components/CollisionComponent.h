@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Physics/Physics.h"
-#include "../../Engine.h"
+#include "Physics/Physics.h"
+#include "Engine.h"
 
 //COLLISION COMPONENT
 //This class is a component for objects that interact with each other, which

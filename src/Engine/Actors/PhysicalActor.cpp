@@ -4,7 +4,7 @@ namespace Actor
 {
 
 	PhysicalActor::PhysicalActor(const Renderer::Model* parentModel, Engine* engine, Physics::ColliderType physicsType, Physics::PhysicsShape colliderShape)
-		:Actor(), 
+		:Actor(engine), 
 		renderObj(parentModel, engine, { transformation.location, transformation.rotation, transformation.scale }),
 		collision(engine, physicsType, colliderShape, { transformation.location, transformation.rotation, glm::vec3(0.5f) })
 	{

@@ -53,7 +53,9 @@ namespace Renderer
 		void unbind();
 
 		void setCameraPosition(glm::vec3 position); //shader must be bound before use
-		void updateLights(const std::vector<std::shared_ptr<PointLight>>* lights, const std::shared_ptr<DirectionalLight>& directLight, const std::shared_ptr<AmbientLight>& ambientLight);
+		void updateLights(const std::map<unsigned int, Light::PointLight*>* lights,
+						  const Light::DirectionalLight* directLight,
+						  const Light::AmbientLight* ambientLight);
 
 		void setFloat(const std::string& name, const float& value);
 		void setFloat2(const std::string& name, const glm::vec2& value);

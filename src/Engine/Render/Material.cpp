@@ -130,14 +130,16 @@ namespace Renderer
 		setFloat3("viewPos", position);
 	}
 
-	void Shader::updateLights(const std::vector<std::shared_ptr<PointLight>>* lights, const std::shared_ptr<DirectionalLight>& directLight, const std::shared_ptr<AmbientLight>& ambientLight)
+	void Shader::updateLights(const std::map<unsigned int, Light::PointLight*>* lights,
+						  	  const Light::DirectionalLight* directLight,
+						  	  const Light::AmbientLight* ambientLight)
 	{
 		const unsigned int MAX_POINT_LIGHTS = 4; //relates to the defined maximum point lights in the PBR shader
 		unsigned int i = 0;
 		
-		for (const std::shared_ptr<PointLight> light : *lights)
+		for (auto const [key, light] : *lights)
 		{
-			if (light.get() != NULL && i < MAX_POINT_LIGHTS) //point light must be valid
+			if (light != NULL && i < MAX_POINT_LIGHTS) //point light must be valid
 			{
 				auto a = light->getShaderStruct().position;
 				setFloat3(std::string("pLights[") + std::to_string(i) + std::string("].pos"), light->getShaderStruct().position);
@@ -151,14 +153,14 @@ namespace Renderer
 			}
 		}
 
-		if (directLight.get()) //directional light must be valid
+		if (directLight) //directional light must be valid
 		{
 			setFloat3("sun.pos", directLight->getShaderStruct().position); //note that position for directional light is actually rotation
 			setFloat3("sun.color", directLight->getShaderStruct().color);
 			setFloat("sun.power", directLight->getShaderStruct().power);
 		}
 
-		if (ambientLight.get())
+		if (ambientLight)
 		{
 			setFloat3("ambientLight", ambientLight->getAmbientLight());
 		}

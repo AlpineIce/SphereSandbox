@@ -1,10 +1,10 @@
 #include "Engine.h"
+
 #include <filesystem>
-#include <iostream>
 #include <regex>
 
-
 Engine::Engine()
+	:directLight(nullptr), ambientLight(nullptr)
 {
 	renderer = std::make_unique<Renderer::RenderEngine>(1600, 900);
 	physicsEngine = std::make_unique<Physics::PhysicsEngine>(&physicsLock);
@@ -141,7 +141,10 @@ unsigned long Engine::addModelInstPtr(Renderer::ModelInstance* inst)
 
 void Engine::removeModelInstPtr(unsigned long location)
 {
-	modelInstPtrs.erase(location);
+	if (modelInstPtrs.count(location))
+	{
+		modelInstPtrs.erase(location);
+	}
 }
 
 void Engine::changeModelInstPtr(Renderer::ModelInstance* inst, unsigned long location)
@@ -164,7 +167,7 @@ unsigned long Engine::addCollisionPtr(Physics::ColliderType type, Physics::Physi
 
 void Engine::removeCollisionPtr(Physics::ColliderType type, unsigned long location)
 {
-	if (type == Physics::ColliderType::DYNAMIC)
+	if (type == Physics::ColliderType::DYNAMIC && dynamicCollisionPtrs.count(location))
 	{
 		dynamicCollisionPtrs.erase(location);
 	}
@@ -176,6 +179,25 @@ void Engine::changeCollisionPtr(Physics::ColliderType type, Physics::PhysicsObje
 	{
 		dynamicCollisionPtrs.at(location) = object;
 	}
+}
+
+unsigned int Engine::addPointLightPtr(Light::PointLight* light)
+{
+	pointLights[(unsigned int)pointLights.size()] = light;
+	return (unsigned int)pointLights.size() - 1;
+}
+
+void Engine::removePointLightPtr(unsigned int location)
+{
+	if (pointLights.count(location))
+	{
+		pointLights.erase(location);
+	}
+}
+
+void Engine::changePointLightPtr(Light::PointLight* light, unsigned int location)
+{
+	pointLights.at(location) = light;
 }
 
 //---------RENDER EVENTS----------//
@@ -193,7 +215,7 @@ void Engine::renderEvent()
 
 	//start by updating the lights and camera
 	getShaderByType(ShaderType::PBR)->setCameraPosition(getRenderer()->getCamera()->getPosition());
-	getShaderByType(ShaderType::PBR)->updateLights(getPointLights(), getDirectLight(), getAmbientLight());
+	getShaderByType(ShaderType::PBR)->updateLights(&pointLights, directLight, ambientLight);
 
 	//maybe do some shadow mapping i havent implemented yet?
 

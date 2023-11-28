@@ -1,4 +1,5 @@
 #include "CollisionComponent.h"
+
 #include <iostream>
 
 namespace ActorComponent

@@ -1,62 +1,69 @@
 #pragma once
 #include "glm/glm.hpp"
 
-class Light
+namespace Light
 {
-protected:
-	struct ShaderStruct
+
+	enum LightType
 	{
-		float power;
-		glm::vec3 position; //position is actually rotation for directional lights
-		glm::vec3 color;
+		POINT = 0,
+		DIRECTIONAL = 1,
+		AMBIENT = 2
 	};
 
-	ShaderStruct light;
+	struct ShaderStruct
+	{
+		float power = 1.0f;
+		glm::vec3 position = glm::vec3(0.0f); //position is actually rotation for directional lights, ignored for ambient
+		glm::vec3 color = glm::vec3(1.0f);
+	};
 
-public:
-	Light(glm::vec3 position);
-	virtual ~Light();
+	class Light
+	{
+	protected:
+		ShaderStruct light;
 
-	inline virtual ShaderStruct getShaderStruct() { return light; }
-	inline virtual void setPower(float power) { light.power = power; }
-};
+	public:
+		Light(ShaderStruct lightInfo);
+		virtual ~Light();
 
-class DirectionalLight : public Light
-{
-private:
+		inline virtual ShaderStruct getShaderStruct() const { return light; }
+		inline virtual void setPower(float power) { light.power = power; }
+		inline virtual void setShaderStruct(ShaderStruct info) { this->light = info; }
+	};
 
-public:
-	DirectionalLight();
-	DirectionalLight(glm::vec3 color);
-	~DirectionalLight() override;
+	class DirectionalLight : public Light
+	{
+	private:
 
-	void setRotation(float horizontalAngle, float verticalAngle); //angles in degrees
-};
+	public:
+		DirectionalLight(ShaderStruct lightInfo);
+		~DirectionalLight() override;
+	};
 
-class PointLight : public Light
-{
-private:
+	class PointLight : public Light
+	{
+	private:
 
-public:
-	PointLight(glm::vec3 position);
-	PointLight(glm::vec3 position, glm::vec3 color);
-	~PointLight() override;
+	public:
+		PointLight(ShaderStruct lightInfo);
+		~PointLight() override;
 
-	void setPosition(glm::vec3 position) { light.position = position; }
+		void setPosition(glm::vec3 position) { light.position = position; }
 
-};
+	};
 
-class AmbientLight
-{
-private:
-	glm::vec3 color;
-	float strength;
+	class AmbientLight : public Light
+	{
+	private:
+		ShaderStruct lightInfo;
 
-public:
-	AmbientLight();
-	AmbientLight(glm::vec3 color);
-	~AmbientLight();
+	public:
+		AmbientLight(ShaderStruct lightInfo);
+		~AmbientLight();
 
-	glm::vec3 getAmbientLight();
-	inline void setPower(float power) { strength = power; }
-};
+		glm::vec3 getAmbientLight() const;
+		inline void setPower(float power) { lightInfo.power = power; }
+	};
+
+}

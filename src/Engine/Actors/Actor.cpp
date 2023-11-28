@@ -3,7 +3,8 @@
 namespace Actor
 {
 
-	Actor::Actor()
+	Actor::Actor(Engine* engine)
+		:engine(engine)
 	{
 		transformation.location = { 0.0f, 0.0f, 0.0f };
 		transformation.rotation = { 1.0f, 0.0f, 0.0f, 0.0f }; //quaternions are scary

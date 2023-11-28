@@ -5,6 +5,7 @@
 #include "Physics/Physics.h"
 
 #include <map>
+#include <iostream>
 #include <vector>
 #include <thread>
 
@@ -22,9 +23,9 @@ private:
 	std::map<std::string, std::shared_ptr<Renderer::Model>> models;
 
 	//point and directional lights
-	std::vector<std::shared_ptr<PointLight>> pointLights;
-	std::shared_ptr<DirectionalLight> directLight; //this could likely be used more than once in a vector
-	std::shared_ptr<AmbientLight> ambientLight;
+	std::map<unsigned int, Light::PointLight*> pointLights;
+	Light::DirectionalLight* directLight;
+	Light::AmbientLight* ambientLight;
 
 	//actor component references
 	std::map<unsigned long, Renderer::ModelInstance*> modelInstPtrs;
@@ -63,19 +64,13 @@ public:
 	inline std::map<std::string, std::shared_ptr<Renderer::Model>>*		getModels() { return &models; }
 	inline Renderer::Model*												getModelFromName(std::string name) { return models.count(name) ? models[name].get() : NULL; }
 	inline std::map<unsigned int, Renderer::Material*>*					getModelMaterialSlots(std::string name) { return models.count(name) ? models[name]->getMaterialSlots() : NULL; }
-	//light getter functions
-	inline std::vector<std::shared_ptr<PointLight>>*					getPointLights() { return &pointLights; }
-	inline std::shared_ptr<DirectionalLight>							getDirectLight() { return directLight; }
-	inline std::shared_ptr<AmbientLight>								getAmbientLight() { return ambientLight; }
-
+	//engines
 	inline Renderer::RenderEngine*										getRenderer() const { return renderer.get(); }
 	inline Physics::PhysicsEngine*										getPhysicsEngine() const { return physicsEngine.get(); }
 
 	//light creation functions
-	inline void createDirectionalLight()								{ directLight = std::make_shared<DirectionalLight>(); }
-	inline void createDirectionalLight(glm::vec3 color)					{ directLight = std::make_shared<DirectionalLight>(color); }
-	inline void createAmbientLight()									{ ambientLight = std::make_shared<AmbientLight>(); }
-	inline void createAmbientLight(glm::vec3 color)						{ ambientLight = std::make_shared<AmbientLight>(color); }
+	inline void setDirectionalLight(Light::DirectionalLight* light)		{ directLight = light; }
+	inline void setAmbientLight(Light::AmbientLight* light)			{ ambientLight = light; }
 
 	//functions for pushing back pointers for actor components, as well as returning their position in the vector
 	unsigned long addModelInstPtr(Renderer::ModelInstance* inst);
@@ -86,6 +81,11 @@ public:
 	unsigned long addCollisionPtr(Physics::ColliderType type, Physics::PhysicsObject* object);
 	void removeCollisionPtr(Physics::ColliderType type, unsigned long location);
 	void changeCollisionPtr(Physics::ColliderType type, Physics::PhysicsObject* object, unsigned long location);
+
+	//adding point lights
+	unsigned int addPointLightPtr(Light::PointLight* light);
+	void removePointLightPtr(unsigned int location);
+	void changePointLightPtr(Light::PointLight* light, unsigned int location);
 	
 	//events
 	void preRender();

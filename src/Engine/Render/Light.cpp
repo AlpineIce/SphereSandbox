@@ -1,82 +1,55 @@
 #include "Light.h"
 
-
-//----------BASE LIGHT DEFINITIONS----------//
-
-Light::Light(glm::vec3 position)
+namespace Light
 {
-	light.color = glm::vec3(1.0f);
-	light.power = 20.0f;
-	light.position = position;
-}
 
-Light::~Light()
-{
-}
+	//----------BASE LIGHT DEFINITIONS----------//
 
-//----------DIRECTIONAL LIGHT DEFINITIONS----------//
+	Light::Light(ShaderStruct lightInfo)
+		:light(lightInfo)
+	{
+	}
 
-DirectionalLight::DirectionalLight()
-	:Light(glm::vec3(0.0, 1.0, 1.0f)) //directional light pointing straight down on init
-{
-	light.power = 3.0f;
-}
+	Light::~Light()
+	{
+	}
 
-DirectionalLight::DirectionalLight(glm::vec3 color)
-	:Light(glm::vec3(0.0, 1.0, 1.0f)) //directional light pointing straight down on init
-{
-	light.power = 3.0f;
-	light.color = color;
-}
+	//----------DIRECTIONAL LIGHT DEFINITIONS----------//
 
-DirectionalLight::~DirectionalLight()
-{
-}
+	DirectionalLight::DirectionalLight(ShaderStruct lightInfo)
+		:Light(lightInfo) //directional light pointing straight down on init
+	{
+	}
 
-void DirectionalLight::setRotation(float horizontalAngle, float verticalAngle) 
-{
-	
-	light.position.x = sin(glm::radians(horizontalAngle));
-	light.position.y = sin(glm::radians(verticalAngle));
-	light.position.z = cos(glm::radians(horizontalAngle));
-}
+	DirectionalLight::~DirectionalLight()
+	{
+	}
 
-//----------POINT LIGHT DEFINITIONS----------//
+	//----------POINT LIGHT DEFINITIONS----------//
 
-PointLight::PointLight(glm::vec3 position)
-	:Light(position)
-{
-}
+	PointLight::PointLight(ShaderStruct lightInfo)
+		:Light(lightInfo)
+	{
+	}
 
-PointLight::PointLight(glm::vec3 position, glm::vec3 color)
-	:Light(position)
-{
-	light.color = color;
-}
+	PointLight::~PointLight()
+	{
+	}
 
-PointLight::~PointLight()
-{
-}
+	//----------AMBIENT LIGHT DEFINITIONS----------//
 
-//----------AMBIENT LIGHT DEFINITIONS----------//
+	AmbientLight::AmbientLight(ShaderStruct lightInfo)
+		:Light(lightInfo)
+	{
+	}
 
-AmbientLight::AmbientLight()
-{
-	color = { 1.0f, 1.0f, 1.0f };
-	strength = 1.0f;
-}
+	AmbientLight::~AmbientLight()
+	{
+	}
 
-AmbientLight::AmbientLight(glm::vec3 color)
-	:color(color)
-{
-	strength = 1.0f;
-}
+	glm::vec3 AmbientLight::getAmbientLight() const
+	{
+		return lightInfo.color * lightInfo.power * 0.1f; //multiply by 0.1 to bring down the ambient light so that strength is a more realistic variable
+	}
 
-AmbientLight::~AmbientLight()
-{
-}
-
-glm::vec3 AmbientLight::getAmbientLight()
-{
-	return color * strength * 0.1f; //multiply by 0.1 to bring down the ambient light so that strength is a more realistic variable
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
@@ -19,9 +20,10 @@ namespace Actor
 	{
 	protected:
 		Transformation transformation;
+		Engine* engine;
 		
 	public:
-		Actor();
+		Actor(Engine* engine);
 		virtual ~Actor();
 
 		virtual void updateComponents(); //this doesnt actually do anything for a base class

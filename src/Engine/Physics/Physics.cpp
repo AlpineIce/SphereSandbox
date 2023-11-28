@@ -29,7 +29,7 @@ namespace Physics
 		double deltaTime = 0.0f;
 		while (looping)
 		{
-			if (deltaTime < 0.001) //make sure physics isnt running so fast that it outdoes double precision, minimum time of 0.1ms
+			if (deltaTime < 0.001) //make sure physics isnt running so fast that it outdoes double precision, minimum time of 1ms
 			{
 				std::chrono::milliseconds waitTime(1);
 				std::this_thread::sleep_for(waitTime);
