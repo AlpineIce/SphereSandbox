@@ -4,11 +4,9 @@
 #include <regex>
 
 Engine::Engine()
-	:directLight(nullptr), ambientLight(nullptr)
+	:directLight(nullptr), ambientLight(nullptr), renderer(1600, 900), physicsEngine(&physicsLock)
 {
-	renderer = std::make_unique<Renderer::RenderEngine>(1600, 900);
-	physicsEngine = std::make_unique<Physics::PhysicsEngine>(&physicsLock);
-	time = renderer->getTimePointer();
+	time = renderer.getTimePointer();
 }
 
 Engine::~Engine()
@@ -56,7 +54,7 @@ void Engine::loadShaders(std::string shadersDir)
 				}
 				if (shaderFiles[0].find("vertex.glsl") != std::string::npos && shaderFiles[1].find("fragment.glsl") != std::string::npos)
 				{
-					this->shaders[ShaderType::PBR] = std::make_shared<Renderer::Shader>(shaderFiles[0].c_str(), shaderFiles[1].c_str(), renderer->getCamera());
+					this->shaders[ShaderType::PBR] = std::make_shared<Renderer::Shader>(shaderFiles[0].c_str(), shaderFiles[1].c_str(), renderer.getCamera());
 				}
 				else
 				{
@@ -205,7 +203,7 @@ void Engine::changePointLightPtr(Light::PointLight* light, unsigned int location
 
 void Engine::preRender()
 {
-	renderer->preDrawEvent();
+	renderer.preDrawEvent();
 }
 
 void Engine::renderEvent()
@@ -214,7 +212,7 @@ void Engine::renderEvent()
 	getShaderByType(ShaderType::PBR)->bind();
 
 	//start by updating the lights and camera
-	getShaderByType(ShaderType::PBR)->setCameraPosition(getRenderer()->getCamera()->getPosition());
+	getShaderByType(ShaderType::PBR)->setCameraPosition(renderer.getCamera()->getPosition());
 	getShaderByType(ShaderType::PBR)->updateLights(&pointLights, directLight, ambientLight);
 
 	//maybe do some shadow mapping i havent implemented yet?
@@ -224,7 +222,7 @@ void Engine::renderEvent()
 	{
 		if (val != NULL)
 		{
-			val->render(*renderer->getCamera());
+			val->render(*renderer.getCamera());
 		}
 	}
 	getShaderByType(ShaderType::PBR)->unbind();
@@ -232,24 +230,24 @@ void Engine::renderEvent()
 
 void Engine::postRender()
 {
-	renderer->postDrawEvent();
+	renderer.postDrawEvent();
 }
 
 bool Engine::checkShouldClose()
 {
-	return renderer->checkWindowClose();
+	return renderer.checkWindowClose();
 }
 
 //---------PRE/POST LOOP EVENTS----------//
 
 void Engine::preLoop()
 {
-	physicsThread = std::thread(&Physics::PhysicsEngine::initLoop, physicsEngine.get(), &dynamicCollisionPtrs);
+	physicsThread = std::thread(&Physics::PhysicsEngine::initLoop, &physicsEngine, &dynamicCollisionPtrs);
 }
 
 void Engine::postLoop()
 {
-	physicsEngine->stopLoop();
+	physicsEngine.stopLoop();
 	physicsThread.join();
 	
 }

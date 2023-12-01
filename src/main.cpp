@@ -6,6 +6,7 @@
 
 #include "Actors/PhysicalActor.h"
 #include "Actors/LightActor.h"
+#include "Actors/Controller.h"
 #include "Engine/Engine.h"
 
 int main()

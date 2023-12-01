@@ -35,8 +35,8 @@ private:
 	std::map<unsigned long, Physics::PhysicsObject*> overlapCollisionPtrs;
 	
 	//render, physics, etc
-	std::unique_ptr<Renderer::RenderEngine> renderer; //renderer "object"
-	std::unique_ptr<Physics::PhysicsEngine> physicsEngine;
+	Renderer::RenderEngine renderer; //renderer "object"
+	Physics::PhysicsEngine physicsEngine;
 
 	//threads
 	std::thread physicsThread;
@@ -65,8 +65,8 @@ public:
 	inline Renderer::Model*												getModelFromName(std::string name) { return models.count(name) ? models[name].get() : NULL; }
 	inline std::map<unsigned int, Renderer::Material*>*					getModelMaterialSlots(std::string name) { return models.count(name) ? models[name]->getMaterialSlots() : NULL; }
 	//engines
-	inline Renderer::RenderEngine*										getRenderer() const { return renderer.get(); }
-	inline Physics::PhysicsEngine*										getPhysicsEngine() const { return physicsEngine.get(); }
+	inline Renderer::RenderEngine*										getRenderer() { return &renderer; }
+	inline Physics::PhysicsEngine*										getPhysicsEngine() { return &physicsEngine; }
 
 	//light creation functions
 	inline void setDirectionalLight(Light::DirectionalLight* light)		{ directLight = light; }
