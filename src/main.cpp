@@ -4,10 +4,11 @@
 #include <vector>
 #include <memory>
 
+#include "Engine/Engine.h"
 #include "Actors/PhysicalActor.h"
 #include "Actors/LightActor.h"
 #include "Actors/Controller.h"
-#include "Engine/Engine.h"
+#include "Actors/Controller.h"
 
 int main()
 {
@@ -59,6 +60,9 @@ int main()
 	pointLightInfo.power = 20.0f;
 	Actor::LightActor pointLight(&engine, Light::LightType::POINT, pointLightInfo);
 	
+	//Controller
+	Actor::Controller player(&engine);
+
 	engine.preLoop(); //physics engine runs seperate from renderer loop below, has its own thread joining here
 
 	bool exitLoop = false;
@@ -74,6 +78,7 @@ int main()
 		engine.renderEvent();
 		engine.postRender();
 		
+		player.updateController();
 		exitLoop = engine.checkShouldClose();
 	}
 	engine.postLoop();

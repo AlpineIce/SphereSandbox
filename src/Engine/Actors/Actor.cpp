@@ -15,10 +15,6 @@ namespace Actor
 	{
 	}
 
-	void Actor::updateComponents()
-	{
-	}
-
 	void Actor::transform(Transformation transformation)
 	{
 		this->transformation = transformation;

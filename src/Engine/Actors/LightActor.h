@@ -1,3 +1,4 @@
+#pragma once
 #include "Actor.h"
 #include "Render/Light.h"
 
@@ -9,7 +10,6 @@ namespace Actor
     private:
         unsigned int engineIndex = 0;
         Light::LightType type;
-        Engine* engine;
 
         Light::Light* lightPtr; //raw ptr
 

@@ -9,10 +9,7 @@ namespace Renderer
 
 	double RenderEngine::deltaTime;
 	Camera RenderEngine::camera;
-	glm::dvec2 RenderEngine::lastCursor = { 0.0f, 0.0f };
 	double RenderEngine::time;
-	bool RenderEngine::mouseClickEvent = false;
-
 
 	RenderEngine::RenderEngine(int width, int height)
 	{
@@ -39,54 +36,6 @@ namespace Renderer
 		glfwGetWindowSize(window, &width, &height);
 		glViewport(0, 0, width, height);
 		camera.setupCamera(90.0f, (unsigned int)width, (unsigned int)height);
-	}
-
-	void RenderEngine::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-	{
-		if (key == GLFW_KEY_ESCAPE)
-		{
-			glfwSetWindowShouldClose(window, GLFW_TRUE);
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && camera.bForwards == false)
-			camera.bForwards = true;
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && camera.bBackwards == false)
-			camera.bBackwards = true;
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && camera.bLeft == false)
-			camera.bLeft = true;
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && camera.bRight == false)
-			camera.bRight = true;
-
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
-			camera.bForwards = false;
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
-			camera.bBackwards = false;
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
-			camera.bLeft = false;
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
-			camera.bRight = false;
-
-
-	}
-
-	void RenderEngine::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-	{
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-			mouseClickEvent = true;
-	}
-
-	void RenderEngine::mouse_callback(GLFWwindow* window, double xpos, double ypos)
-	{
-		glm::dvec2 offset;
-		offset.x = (lastCursor.x - xpos);
-		offset.y = (lastCursor.y - ypos); // reversed since y-coordinates range from bottom to top
-
-		lastCursor.x = xpos;
-		lastCursor.y = ypos;
-
-		camera.rotate(offset);
-
-		//camera.rotate()
 	}
 
 	//----------GLFW WINDOW----------//
@@ -128,9 +77,6 @@ namespace Renderer
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwSetErrorCallback(glfwErrorCallback);
 		glfwSetFramebufferSizeCallback(window, rebuildFramebufferCallback);
-		glfwSetKeyCallback(window, keyCallback);
-		glfwSetMouseButtonCallback(window, mouse_button_callback);
-		glfwSetCursorPosCallback(window, mouse_callback);
 
 		//glew
 		if (glewInit() != GLEW_OK)
@@ -141,10 +87,11 @@ namespace Renderer
 		camera.setupCamera(90.0f, width, height);
 
 		// During init, enable debug output
+		/*
 #ifdef _DEBUG
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
-#endif
+#endif*/
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glEnable(GL_CULL_FACE);
@@ -163,7 +110,6 @@ namespace Renderer
 	{
 		deltaTime = glfwGetTime() - time;
 		time = glfwGetTime();
-		camera.update(deltaTime);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

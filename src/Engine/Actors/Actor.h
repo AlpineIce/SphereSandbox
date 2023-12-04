@@ -26,8 +26,6 @@ namespace Actor
 		Actor(Engine* engine);
 		virtual ~Actor();
 
-		virtual void updateComponents(); //this doesnt actually do anything for a base class
 		virtual void transform(Transformation transform);
 	};
-
 }

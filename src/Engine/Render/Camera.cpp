@@ -12,12 +12,8 @@ namespace Renderer
 	Camera::Camera()
 	{
 		resolution = { 1, 1 };
-		cameraPitchYaw = { 180.0f, 0.0f };
+		axes.cameraPitchYaw = { 180.0f, 0.0f };
 		position = glm::vec3(0.0f, 0.0f, 2.0f);
-		bForwards = false;
-		bBackwards = false;
-		bLeft = false;
-		bRight = false;
 	}
 
 	Camera::~Camera()
@@ -31,26 +27,6 @@ namespace Renderer
 		updateView();
 	}
 
-	void Camera::update(const double& deltaTime)
-	{
-		if (bForwards)
-		{
-			translate(target * (float)(deltaTime * 8.0f));
-		}
-		if (bBackwards)
-		{
-			translate(-target * (float)(deltaTime * 8.0f));
-		}
-		if (bLeft)
-		{
-			translate(-rightAxis * (float)(deltaTime * 8.0f));
-		}
-		if (bRight)
-		{
-			translate(rightAxis * (float)(deltaTime * 8.0f));
-		}
-	}
-
 	void Camera::translate(glm::vec3 translation)
 	{
 		position += translation;
@@ -61,23 +37,23 @@ namespace Renderer
 	{
 		float sensitivity = 0.15f;
 
-		cameraPitchYaw += pitchYaw * sensitivity;
+		axes.cameraPitchYaw += pitchYaw * sensitivity;
 
-		if (cameraPitchYaw.x > 360.0f)
+		if (axes.cameraPitchYaw.x > 360.0f)
 		{
-			cameraPitchYaw.x = cameraPitchYaw.x - 360.0f;
+			axes.cameraPitchYaw.x = axes.cameraPitchYaw.x - 360.0f;
 		}
-		else if (cameraPitchYaw.x < -360.0f)
+		else if (axes.cameraPitchYaw.x < -360.0f)
 		{
-			cameraPitchYaw.x = cameraPitchYaw.x + 360.0f;
+			axes.cameraPitchYaw.x = axes.cameraPitchYaw.x + 360.0f;
 		}
-		if (cameraPitchYaw.y > 89.0f)
+		if (axes.cameraPitchYaw.y > 89.0f)
 		{
-			cameraPitchYaw.y = 89.0f;
+			axes.cameraPitchYaw.y = 89.0f;
 		}
-		else if (cameraPitchYaw.y < -89.0f)
+		else if (axes.cameraPitchYaw.y < -89.0f)
 		{
-			cameraPitchYaw.y = -89.0f;
+			axes.cameraPitchYaw.y = -89.0f;
 		}
 
 		updateView();
@@ -86,15 +62,15 @@ namespace Renderer
 	void Camera::updateView()
 	{
 
-		target.x = cos(cameraPitchYaw.y * (PI / 180.0f)) * (sin(cameraPitchYaw.x * (PI / 180.0f)));
-		target.y = sin(cameraPitchYaw.y * (PI / 180.0f));
-		target.z = cos(cameraPitchYaw.y * (PI / 180.0f)) * (cos(cameraPitchYaw.x * (PI / 180.0f)));
+		axes.target.x = cos(axes.cameraPitchYaw.y * (PI / 180.0f)) * (sin(axes.cameraPitchYaw.x * (PI / 180.0f)));
+		axes.target.y = sin(axes.cameraPitchYaw.y * (PI / 180.0f));
+		axes.target.z = cos(axes.cameraPitchYaw.y * (PI / 180.0f)) * (cos(axes.cameraPitchYaw.x * (PI / 180.0f)));
 
-		direction = glm::normalize(position - target);
-		rightAxis = glm::normalize(glm::cross(glm::vec3(0.0f, -1.0f, 0.0f), target));
-		upAxis = glm::cross(direction, rightAxis);
+		axes.direction = glm::normalize(position - axes.target);
+		axes.rightAxis = glm::normalize(glm::cross(glm::vec3(0.0f, -1.0f, 0.0f), axes.target));
+		axes.upAxis = glm::cross(axes.direction, axes.rightAxis);
 
-		view = glm::lookAt(position, target + position, glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::lookAt(position, axes.target + position, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 }
